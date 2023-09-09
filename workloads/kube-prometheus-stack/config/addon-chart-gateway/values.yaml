@@ -1,0 +1,16 @@
+# these most likely are overridden in the appset yaml...
+prometheus:
+  URL: "example.com"
+  service:
+    Name: "prom-example"
+    Port: "9090"
+grafana:
+  URL: "example.com"
+  service:
+    Name: "graf-example"
+    Port: "80"
+alertmanager:
+  URL: "example.com"
+  service:
+    Name: "alert-example"
+    Port: "80"

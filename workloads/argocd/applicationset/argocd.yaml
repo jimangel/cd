@@ -1,0 +1,67 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: self-managed-argocd
+  namespace: argocd
+spec:
+  goTemplate: true
+  # we default the destination to be itself...
+  generators:
+    # really only using this to match my .releaseName...
+    # TODO: can this be combined with the helm values vs. 2 sources?
+  - git:
+      files:
+      - path: clusters/*.yaml
+      repoURL: "https://github.com/jimangel/cd.git"
+      revision: HEAD
+    selector:
+      matchLabels:
+        workloads.argocd: "deployed"
+  template:
+    metadata:
+      # No need for a unique name, there should only be one per "area" of management
+      # argo can share same repo, but see itself
+      name: '01-self-managed-argo'
+      finalizers:
+      - resources-finalizer.argocd.argoproj.io
+      labels:
+        workloadType: cd
+        # document what selectors are used
+        environment: "{{ .themes.environment }}"
+        # how is this workload deployed in argocd?
+        syncType: "kustomize"
+        # for quick ref
+        cluster: "{{ .cluster.friendlyName }}"
+    spec:
+      project: default
+      sources:
+      # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+      # !!!!!!!!!!!!!!!! SELF !!!!!!!!!!!!!!!!!!!!!!!
+      # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+      - repoURL: https://github.com/jimangel/cd.git
+        targetRevision: HEAD
+        path: workloads/argocd/config/overlays/{{ .themes.environment }}
+      # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+      # !!!!! ALL OF THE OTHER APPLICATION SETS !!!!!
+      # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+      # Plain recursive set of application set yaml files (1:many apps)
+      - repoURL: "https://github.com/jimangel/cd.git"
+        targetRevision: HEAD
+        directory:
+          recurse: true
+          jsonnet: {}
+          # we only want NEW application sets & exclude argocd because it manages itself above
+          # also exclude anything "work in progress"
+          exclude: '{**/config/*,argocd,WIP*}'
+        path: workloads
+      destination:
+        name: '{{ .cluster.name }}'
+        namespace: 'argocd'
+      syncPolicy:
+        automated: {}
+        syncOptions:
+          - CreateNamespace=true
+          - preserveResourcesOnDeletion=true
+  syncPolicy:
+    applicationsSync: create-update
+    preserveResourcesOnDeletion: true

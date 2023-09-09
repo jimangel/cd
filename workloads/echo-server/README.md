@@ -1,0 +1,1 @@
+helm template workloads/echo-server/config/local-helm

@@ -1,0 +1,13 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+# additional resources like ingress rules, cluster and repository secrets.
+resources:
+- ../../base
+
+## changes to config maps
+# https://dev.to/nulldutra/disabling-tls-in-argocd-server-4jij
+patchesStrategicMerge:
+- argocd-cmd-params-cm.yaml
+# https://argo-cd.readthedocs.io/en/stable/user-guide/kustomize/
+- argocd-cm.yaml

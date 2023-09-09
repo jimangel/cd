@@ -1,0 +1,29 @@
+cluster:
+  # try to match name in ArgoCD or planned name
+  name: in-cluster
+  # for applicationset names generally
+  friendlyName: "gpu-box"
+  # use https://kubernetes.default.svc for local argo
+  server: https://192.168.7.51:6443
+  domain: cloudydemo.com
+  # could be used for common ingress settings per cluster domain
+  subdomain: gpu-local
+# themes for common and shared values
+themes:
+  environment: staging
+  #role: ci
+  #provider: baremetal|gke|aws
+  provider: baremetal
+# workloads opt-in as inventory
+workloads:
+  argocd: deployed
+  echo-server: deployed
+  gateway-api-crds: deployed
+  # like ingress, this is the north south ingress "Gateway API" gateway
+  gateway-api-istio-ingress: deployed
+  certmanager: deployed
+  istio: deployed
+  metrics-server: deployed
+  external-secrets-operator: deployed
+  gatekeeper: deployed
+  kube-prometheus-stack: deployed

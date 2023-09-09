@@ -1,0 +1,14 @@
+# setting here doesn't really matter, maybe for future resources. Value must be set in the charts.
+namespace: istio-system
+
+helmCharts:
+- name: base
+  namespace: istio-system
+  version: 1.19.2
+  repo: https://istio-release.storage.googleapis.com/charts
+  valuesInline:
+    defaultRevision: "default"
+- name: istiod
+  namespace: istio-system
+  version: 1.19.2
+  repo: https://istio-release.storage.googleapis.com/charts

@@ -1,0 +1,49 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: metrics-server
+  namespace: argocd
+spec:
+  goTemplate: true
+  generators:
+  - git:
+      files:
+      - path: clusters/*.yaml
+      repoURL: "https://github.com/jimangel/cd.git"
+      revision: HEAD
+    selector:
+      matchLabels:
+        workloads.metrics-server: "deployed"
+  template:
+    metadata:
+      name: 'metrics-server-{{ if eq .cluster.name "in-cluster" }}local{{ else }}{{ .cluster.friendlyName }}{{ end }}'
+      labels:
+        workloadType: sre
+        environment: "{{ .themes.environment }}"
+        # how is this workload deployed in argocd?
+        syncType: "helm-remote"
+        # for quick ref
+        cluster: "{{ .cluster.friendlyName }}"
+      finalizers:
+      - "resources-finalizer.argocd.argoproj.io"
+    spec:
+      project: default
+      sources:
+      - chart: metrics-server
+        repoURL: https://kubernetes-sigs.github.io/metrics-server
+        targetRevision: '3.11.0'
+        helm:
+          # setting internalIP to not use hostname, insecure tls to not provide/issue ca certs, and tmp dir for self-signed.
+          values: |
+            defaultArgs:
+              - --kubelet-preferred-address-types=InternalIP
+              - --kubelet-insecure-tls
+              - --cert-dir=/tmp
+      destination:
+        name: '{{ .cluster.name }}'
+        # no namespace, cluster wide CRDs...
+        namespace: 'kube-system'
+      syncPolicy:
+        automated: {}
+        syncOptions:
+          - CreateNamespace=true

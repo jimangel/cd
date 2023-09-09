@@ -1,0 +1,55 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: certmanager
+  namespace: argocd
+spec:
+  goTemplate: true
+  # we default the destination to be itself...
+  generators:
+    # really only using this to match my .releaseName...
+    # TODO: can this be combined with the helm values vs. 2 sources?
+  - git:
+      files:
+      - path: clusters/*.yaml
+      repoURL: "https://github.com/jimangel/cd.git"
+      revision: HEAD
+    selector:
+      matchLabels:
+        workloads.certmanager: "deployed"
+  template:
+    metadata:
+      name: 'certmanager-{{ if eq .cluster.name "in-cluster" }}local{{ else }}{{ .cluster.friendlyName }}{{ end }}'
+      labels:
+        workloadType: security
+        environment: "{{ .themes.environment }}"
+        # how is this workload deployed in argocd?
+        syncType: "helm-remote"
+        # for quick ref
+        cluster: "{{ .cluster.friendlyName }}"
+      finalizers:
+      - "resources-finalizer.argocd.argoproj.io"
+    spec:
+      project: default
+      sources:
+      # install argo-cd matching what we did with helm-ish...
+      - chart: cert-manager
+        repoURL: https://charts.jetstack.io
+        targetRevision: 'v1.13.1'
+        helm:
+          parameters:
+          - name: "installCRDs"
+            value: "true"
+          valueFiles:
+            - $values/workloads/certmanager/config/values-{{ .themes.environment }}.yaml
+      # If the path field is not set, Argo CD will use the repository solely as a source of value files.
+      - repoURL: "https://github.com/jimangel/cd.git"
+        targetRevision: HEAD
+        ref: values
+      destination:
+        name: '{{ .cluster.name }}'
+        namespace: 'cert-manager'
+      syncPolicy:
+        automated: {}
+        syncOptions:
+          - CreateNamespace=true

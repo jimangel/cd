@@ -1,0 +1,11 @@
+namespace: istio-gateway
+
+resources:
+- ../../base
+- gateway.yaml
+
+patches:
+- path: service-patch.yaml
+  target:
+    kind: Service
+    name: north-south-gateway

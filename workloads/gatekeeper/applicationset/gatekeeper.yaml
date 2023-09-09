@@ -1,0 +1,51 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: gatekeeper
+  namespace: argocd
+spec:
+  goTemplate: true
+  generators:
+  - git:
+      files:
+      - path: clusters/*.yaml
+      repoURL: "https://github.com/jimangel/cd.git"
+      revision: HEAD
+    selector:
+      matchLabels:
+        workloads.gatekeeper: "deployed"
+  template:
+    metadata:
+      name: 'gatekeeper-{{ if eq .cluster.name "in-cluster" }}local{{ else }}{{ .cluster.friendlyName }}{{ end }}'
+      labels:
+        workloadType: security
+        # document what selectors are used
+        environment: "{{ .themes.environment }}"
+        # how is this workload deployed in argocd?
+        syncType: "helm-remote"
+        # for quick ref
+        cluster: "{{ .cluster.friendlyName }}"
+      finalizers:
+      - "resources-finalizer.argocd.argoproj.io"
+    spec:
+      project: default
+      sources:
+      - chart: gatekeeper
+        repoURL: https://open-policy-agent.github.io/gatekeeper/charts
+        targetRevision: '3.13.2'
+        helm:
+          # setting internalIP to not use hostname, insecure tls to not provide/issue ca certs, and tmp dir for self-signed.
+          #values: |
+          #  arg1: val1
+      - repoURL: https://github.com/jimangel/cd.git
+        targetRevision: 'HEAD'
+        directory:
+          recurse: true
+        path: workloads/gatekeeper/config/raw
+      destination:
+        name: '{{ .cluster.name }}'
+        namespace: 'gatekeeper-system'
+      syncPolicy:
+        automated: {}
+        syncOptions:
+          - CreateNamespace=true

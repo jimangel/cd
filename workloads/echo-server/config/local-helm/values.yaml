@@ -1,0 +1,2 @@
+containerName: demo
+image: inanimate/echo-server

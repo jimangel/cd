@@ -1,0 +1,50 @@
+apiVersion: gateway.networking.k8s.io/v1beta1
+kind: HTTPRoute
+metadata:
+  name: grafana-http-redirect
+  namespace: monitoring
+spec:
+  parentRefs:
+  - group: gateway.networking.k8s.io	
+    kind: Gateway
+    name: cluster-north-south-gateway
+    namespace: istio-gateway
+    port: 80
+  hostnames:
+    - {{ .Values.grafana.url }}
+  rules:
+    - filters:
+        - type: RequestRedirect
+          requestRedirect:
+            scheme: https
+            statusCode: 301
+      matches:	
+        - path:	
+            type: PathPrefix	
+            value: /
+---
+apiVersion: gateway.networking.k8s.io/v1beta1
+kind: HTTPRoute
+metadata:
+  name: grafana-https
+  namespace: monitoring
+spec:
+  parentRefs:
+  - group: gateway.networking.k8s.io	
+    kind: Gateway
+    name: cluster-north-south-gateway
+    namespace: istio-gateway
+    port: 443
+  hostnames:
+    - {{ .Values.grafana.url }}
+  rules:
+  - backendRefs:
+     - group: ""
+       kind: Service
+       name: {{ .Values.grafana.service.name }}
+       port: {{ .Values.grafana.service.port }}
+       weight: 1
+    matches:	
+      - path:	
+          type: PathPrefix	
+          value: /

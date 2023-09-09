@@ -1,0 +1,51 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: echo-server-appset
+  namespace: argocd
+spec:
+  goTemplate: true
+  # we default the destination to be itself...
+  generators:
+    # really only using this to match my .releaseName...
+    # TODO: can this be combined with the helm values vs. 2 sources?
+  - git:
+      files:
+      - path: clusters/*.yaml
+      repoURL: "https://github.com/jimangel/cd.git"
+      revision: HEAD
+    selector:
+      matchLabels:
+        workloads.echo-server: "deployed"
+  template:
+    metadata:
+      name: 'echo-server-{{ if eq .cluster.name "in-cluster" }}local{{ else }}{{ .cluster.friendlyName }}{{ end }}'
+      finalizers:
+      - "resources-finalizer.argocd.argoproj.io"
+      labels:
+        workloadType: demo
+        # document what selectors are used
+        environment: "{{ .themes.environment }}"
+        # how is this workload deployed in argocd?
+        syncType: "helm-local"
+        # for quick ref
+        cluster: "{{ .cluster.friendlyName }}"
+    spec:
+      project: default
+      sources:
+      # install argo-cd matching what we did with helm-ish...
+      - repoURL: "https://github.com/jimangel/cd.git"
+        targetRevision: HEAD
+        helm:
+          releaseName: 'test'
+          values: |
+            containerName: testing
+        path: workloads/echo-server/config/local-helm
+      destination:
+        #server: '{{ .cluster.server }}'
+        name: '{{ .cluster.name }}'
+        namespace: 'default'
+      syncPolicy:
+        automated: {}
+        syncOptions:
+          - CreateNamespace=true

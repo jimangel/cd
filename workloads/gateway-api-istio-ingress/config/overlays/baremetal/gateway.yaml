@@ -1,0 +1,31 @@
+apiVersion: gateway.networking.k8s.io/v1beta1
+kind: Gateway
+metadata:
+  name: cluster-north-south-gateway
+  namespace: istio-gateway
+spec:
+  gatewayClassName: istio
+  addresses:
+  - value: north-south-gateway.istio-gateway.svc.cluster.local
+    type: Hostname
+  listeners:
+  - name: https
+    hostname: "*.gpu-local.cloudydemo.com"
+    port: 443
+    protocol: HTTPS
+    tls:
+      mode: Terminate
+      certificateRefs:
+      - name: "gateway-http-https-wildcard-cert"
+    allowedRoutes:
+      namespaces:
+        from: All
+  - name: http
+    protocol: HTTP
+    port: 80
+    hostname: "*.gpu-local.cloudydemo.com"
+    allowedRoutes:
+      namespaces:
+        from: All
+      kinds:
+      - kind: HTTPRoute

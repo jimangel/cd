@@ -1,0 +1,90 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: kube-prometheus-stack
+  namespace: argocd
+spec:
+  goTemplate: true
+  generators:
+    # matrix 'parent' generator
+  - matrix:
+   #     # get the clusters to be impacted
+      generators:
+        # git generator, 'child' #1 == select clusters
+        - git:
+            files:
+              - path: clusters/*.yaml
+            repoURL: "https://github.com/jimangel/cd.git"
+            revision: HEAD
+            # only needed to avoid conflicts with the second generator
+            pathParamPrefix: dest
+          selector:
+            matchLabels:
+              workloads.kube-prometheus-stack: "deployed"
+        - git:
+            files:
+              - path: workloads/kube-prometheus-stack/applicationset/environment/{{ .themes.environment }}.yaml
+            repoURL: "https://github.com/jimangel/cd.git"
+            revision: HEAD
+  template:
+    metadata:
+      name: 'kube-prometheus-stack-{{ if eq .cluster.name "in-cluster" }}local{{ else }}{{ .cluster.friendlyName }}{{ end }}'
+      labels:
+        workloadType: sre
+        environment: "{{ .themes.environment }}"
+        # how is this workload deployed in argocd?
+        syncType: "helm-remote-plus-helm-local"
+        # for quick ref
+        cluster: "{{ .cluster.friendlyName }}"
+      finalizers:
+      - "resources-finalizer.argocd.argoproj.io"
+    spec:
+      project: default
+      sources:
+      - chart: kube-prometheus-stack
+        repoURL: https://prometheus-community.github.io/helm-charts
+        targetRevision: '{{ .targetRevisionHelm }}'
+        helm:
+          values: |
+            kubeProxy:
+              enabled: false
+            kubeEtcd:
+              enabled: false
+          valueFiles:
+          - $values/workloads/kube-prometheus-stack/config/helm-values/{{ .themes.environment }}.yaml
+      - repoURL: "https://github.com/jimangel/cd.git"
+        targetRevision: '{{ .targetRevisionGit }}'
+        ref: values
+      # get the Gateway API ingress resources from a local-helm config
+      - repoURL: "https://github.com/jimangel/cd.git"
+        targetRevision: '{{ .targetRevisionGit }}'
+        helm:
+          parameters:
+          - name: prometheus.URL
+            value: "prometheus.{{ .cluster.subdomain }}.{{ .cluster.domain }}"
+          # doing some funky stuff (slice by 4 chars) with helm values to match the generated template / app name
+          values: |
+            prometheus:
+              url: "prometheus.{{ .cluster.subdomain }}.{{ .cluster.domain }}"
+              service:
+                name: "kube-prometheus-stack-{{ if eq .cluster.name "in-cluster" }}loca{{ else }}{{ slice .cluster.friendlyName 0 4 }}{{ end }}-prometheus"
+                port: "9090"
+            grafana:
+              url: "grafana.{{ .cluster.subdomain }}.{{ .cluster.domain }}"
+              service:
+                name: "kube-prometheus-stack-{{ if eq .cluster.name "in-cluster" }}local{{ else }}{{ .cluster.friendlyName }}{{ end }}-grafana"
+                port: "80"
+            alertmanager:
+              url: "alertmanager.{{ .cluster.subdomain }}.{{ .cluster.domain }}"
+              service:
+                name: "kube-prometheus-stack-{{ if eq .cluster.name "in-cluster" }}loca{{ else }}{{ slice .cluster.friendlyName 0 4 }}{{ end }}-alertmanager"
+                port: "9093"
+        path: workloads/kube-prometheus-stack/config/addon-chart-gateway
+      destination:
+        name: '{{ .cluster.name }}'
+        namespace: 'monitoring'
+      syncPolicy:
+        automated: {}
+        syncOptions:
+          - CreateNamespace=true
+          - ServerSideApply=true

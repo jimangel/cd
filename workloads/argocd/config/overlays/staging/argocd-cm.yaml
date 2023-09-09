@@ -1,0 +1,18 @@
+# https://argo-cd.readthedocs.io/en/stable/operator-manual/argocd-cm-yaml/
+# https://argo-cd.readthedocs.io/en/stable/user-guide/kustomize/
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: argocd-cm
+  namespace: argocd
+data:
+  kustomize.buildOptions: --enable-helm
+  # https://github.com/istio/istio/issues/44285
+  # https://github.com/argoproj/argo-cd/issues/4276#issuecomment-1328165733
+  resource.customizations.ignoreDifferences.admissionregistration.k8s.io_ValidatingWebhookConfiguration: |
+    jsonPointers:
+    - /webhooks/0/clientConfig/caBundle
+    - /webhooks/0/failurePolicy
+    jqPathExpressions:
+    - .webhooks[0].clientConfig.caBundle
+    - .webhooks[0].failurePolicy
