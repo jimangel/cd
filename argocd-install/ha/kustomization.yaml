@@ -1,0 +1,12 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+# base Argo CD components
+# https://github.com/argoproj/argo-cd/releases
+#- https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/ha/install.yaml
+- https://raw.githubusercontent.com/argoproj/argo-cd/v2.8.3/manifests/ha/install.yaml
+
+components:
+# extensions controller component
+- https://github.com/argoproj-labs/argocd-extensions/manifests
