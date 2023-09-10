@@ -1,0 +1,17 @@
+{
+    "argocd": "local",
+    "cluster": {
+      "email": "",
+      "name": "gpu-box",
+      "env": "staging",
+      "address": "https://192.168.7.51:6443"
+    },
+    "ingress-helm": {
+        "controller.hostNetwork": "true",
+        "controller.service.enabled": "false"
+      },
+    "prometheus-helm": {
+        "ingress": "true",
+        "host": "prom.192.168.7.51.xip.io"
+      }
+  }
