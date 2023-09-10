@@ -5,11 +5,11 @@
       "env": "staging",
       "address": "https://192.168.7.51:6443"
     },
-    "ingress-helm": {
+    "ingressHelm": {
         "controller.hostNetwork": "true",
         "controller.service.enabled": "false"
       },
-    "prometheus-helm": {
+    "prometheusHelm": {
         "ingress": "true",
         "host": "prom.192.168.7.51.xip.io"
       }
