@@ -1,8 +1,7 @@
 {
-    "argocd": "local",
+    "server": "https://kubernetes.default.svc",
     "cluster": {
-      "email": "",
-      "name": "gpu-box",
+      "name": "in-cluster",
       "env": "staging",
       "address": "https://192.168.7.51:6443"
     },
@@ -14,4 +13,4 @@
         "ingress": "true",
         "host": "prom.192.168.7.51.xip.io"
       }
-  }
+}
