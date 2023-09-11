@@ -1,9 +1,9 @@
 {
-    "server": "https://kubernetes.default.svc",
     "cluster": {
       "name": "in-cluster",
       "env": "staging",
-      "address": "https://192.168.7.51:6443"
+      "address": "https://192.168.7.51:6443",
+      "argoDestination": "https://kubernetes.default.svc"
     },
     "ingressHelm": {
         "controller.hostNetwork": "true",
