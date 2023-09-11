@@ -10,7 +10,7 @@
         "controller.service.enabled": "false"
       },
     "prometheusHelm": {
-        "ingress": "true",
+        "ingress": "false",
         "host": "prom.192.168.7.51.xip.io"
       }
 }
