@@ -1,0 +1,46 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: prometheus-app
+  namespace: argocd
+spec:
+  goTemplate: true
+  goTemplateOptions: ["missingkey=error"]
+  generators:
+  - git:
+      repoURL: 'git@github.com:jimangel/cd'
+      revision: HEAD
+      files:
+      - path: 'cluster-config/**/**/config.json'
+    selector:
+      matchLabels:
+        cluster.env: staging
+        prometheusHelm.deployment: active
+  template:
+    metadata:
+      name: 'prometheus-app'
+    spec:
+      project: default
+      source:
+        chart: kube-prometheus-stack
+        repoURL: https://prometheus-community.github.io/helm-charts
+        targetRevision: 50.3.1
+        helm:
+          releaseName: prometheus-app
+          values: |
+            {{- if eq (index .prometheusHelm "ingress") "true" }}
+            prometheus:
+              ingress:
+                enabled: true
+                ingressClassName: nginx
+                hosts:
+                  - {{ index .prometheusHelm "host" }}
+            {{- end }}
+      destination:
+        server: '{{ .cluster.argoDestination }}'
+        namespace: monitoring
+      syncPolicy:
+        automated: {}
+        syncOptions:
+          - CreateNamespace=true
+          - ServerSideApply=true

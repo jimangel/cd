@@ -124,6 +124,7 @@ EOF
 
 ```
 # TODO: auto-add cluster(s) with a config.json entry
+
 ```
 
 ## Remove argo
