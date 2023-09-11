@@ -6,11 +6,13 @@
       "argoDestination": "https://kubernetes.default.svc"
     },
     "ingressHelm": {
+        "deployed": "true",
         "controller.hostNetwork": "true",
         "controller.service.enabled": "false"
       },
     "prometheusHelm": {
-        "ingress": "false",
+        "deployed": "true",
+        "ingress": "true",
         "host": "prom.192.168.7.51.xip.io"
       }
 }
