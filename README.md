@@ -1,5 +1,24 @@
 # cd
 
+Complex / simple CD setup. After one-time / one-line setup argoCD, future operations look like:
+
+1. add cluster to argoCD
+1. create cluster values.json in proper environment
+
+Done!
+
+It is up to you to determine what an "environment" is but the concept to keep management simple is:
+
+- AppSets rule the world (cluster / env selection / e2e CD)
+- A cluster config (json) inherits the parent folder name environment
+- Cluster config should contain an app list and minimal unique config (such as host names)
+
+Keep the power limited to a few areas (cluster config directory location / AppSet). Try to generalize as much as possible into environment (AppSet) configs.
+
+Following these principals makes updating, scaling, and debugging easier as each "knob" is limited to only a few areas with fewer parameters.
+
+- TODO: rename the files to their hosts (k8s-xxx-thing.yaml, argocd-envxxxxx.json, helm-values-env-xxxx.yaml)
+
 ## Pre reqs
 
 ```

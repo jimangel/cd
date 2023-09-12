@@ -1,0 +1,4 @@
+{
+  "targetRevision": "50.*.*",
+  "ingress": "true"
+}

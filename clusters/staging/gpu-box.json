@@ -4,6 +4,16 @@
       "address": "https://192.168.7.51:6443",
       "argoDestination": "https://kubernetes.default.svc"
     },
+    "kustomize": {
+      "deployment": "active",
+      "folder": "test",
+      "description": "The generic catchall for non-helm / rbac stuff"
+    },
+    "argocdHelm": {
+      "deployment": "active",
+      "niu-controller.HAENABLE": "true",
+      "description": "ArgoCD in ArgoCD inception"
+    },
     "ingressHelm": {
         "deployment": "active",
         "controller.hostNetwork": "true",

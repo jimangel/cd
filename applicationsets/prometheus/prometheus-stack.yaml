@@ -7,14 +7,25 @@ spec:
   goTemplate: true
   goTemplateOptions: ["missingkey=error"]
   generators:
-  - git:
-      repoURL: 'git@github.com:jimangel/cd'
-      revision: HEAD
-      files:
-      - path: 'clusters/**/*.json'
-    selector:
-      matchLabels:
-        prometheusHelm.deployment: active
+    - matrix:
+        generators:
+          # get list of clusters that want the app (cluster-specific values)
+          - git:
+              repoURL: 'git@github.com:jimangel/cd'
+              revision: HEAD
+              pathParamPrefix: env
+              files:
+                - path: 'clusters/**/*.json'
+            selector:
+              matchLabels:
+                prometheusHelm.deployment: active
+          # get env specific values
+          - git:
+              repoURL: 'git@github.com:jimangel/cd'
+              revision: HEAD
+              pathParamPrefix: app
+              files:
+                - path: 'argocd-install/applicationsets/prometheus/env-{{.env.path.basename}}.json'
   template:
     metadata:
       name: 'prometheus-app'
@@ -23,11 +34,11 @@ spec:
       source:
         chart: kube-prometheus-stack
         repoURL: https://prometheus-community.github.io/helm-charts
-        targetRevision: '{{ if eq .path.basename "production" }}50.3.1{{ else if eq .path.basename "staging" }}HEAD{{ end }}'
+        targetRevision: '{{ .targetRevision }}'
         helm:
-          releaseName: prometheus-app-{{.path.basename}}
+          releaseName: prometheus-app-{{.env.path.basename}}
           values: |
-            {{- if eq (index .prometheusHelm "ingress") "true" }}
+            {{- if .ingress }}
             prometheus:
               ingress:
                 enabled: true
