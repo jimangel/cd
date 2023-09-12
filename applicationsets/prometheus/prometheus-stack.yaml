@@ -15,7 +15,7 @@ spec:
               revision: HEAD
               pathParamPrefix: env
               files:
-                - path: 'clusters/**/*.json'
+                - path: 'cluster-inventory/**/*.json'
             selector:
               matchLabels:
                 prometheusHelm.deployment: active
@@ -25,7 +25,7 @@ spec:
               revision: HEAD
               pathParamPrefix: app
               files:
-                - path: 'argocd-install/applicationsets/prometheus/env-{{.env.path.basename}}.json'
+                - path: 'applicationsets/prometheus/env-{{.env.path.basename}}.json'
   template:
     metadata:
       name: 'prometheus-app'
