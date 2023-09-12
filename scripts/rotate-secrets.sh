@@ -1,1 +1,1 @@
-#TODO: also allow seeding / interactive secrets
+#TODO: also allow seeding / interactive secrets (edit)
