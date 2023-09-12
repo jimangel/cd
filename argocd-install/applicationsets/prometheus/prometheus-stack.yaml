@@ -11,10 +11,9 @@ spec:
       repoURL: 'git@github.com:jimangel/cd'
       revision: HEAD
       files:
-      - path: 'cluster-config/**/**/config.json'
+      - path: 'clusters/**/*.json'
     selector:
       matchLabels:
-        cluster.env: staging
         prometheusHelm.deployment: active
   template:
     metadata:
@@ -24,9 +23,9 @@ spec:
       source:
         chart: kube-prometheus-stack
         repoURL: https://prometheus-community.github.io/helm-charts
-        targetRevision: 50.3.1
+        targetRevision: '{{ if eq .path.basename "production" }}50.3.1{{ else if eq .path.basename "staging" }}HEAD{{ end }}'
         helm:
-          releaseName: prometheus-app
+          releaseName: prometheus-app-{{.path.basename}}
           values: |
             {{- if eq (index .prometheusHelm "ingress") "true" }}
             prometheus:
