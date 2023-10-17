@@ -1,0 +1,20 @@
+cluster:
+  # try to match name in ArgoCD or planned name
+  name: cluster-app
+  # for applicationset names generally
+  friendlyName: "gke-dev"
+  # use https://kubernetes.default.svc for local argo
+  server: https://connectgateway.googleapis.com/v1/projects/939615843266/locations/us-central1/gkeMemberships/dev
+  domain: cloudydemo.com
+  # could be used for common ingress settings per cluster domain
+  subdomain: gke-dev
+# themes for common and shared values
+themes:
+  environment: staging
+  #role: ci
+  #provider: baremetal|gke|aws
+  provider: gke
+# workloads opt-in as inventory
+workloads:
+  certmanager: deployed
+  gatekeeper: deployed

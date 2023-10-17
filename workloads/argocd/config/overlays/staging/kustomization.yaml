@@ -7,7 +7,7 @@ resources:
 
 ## changes to config maps
 # https://dev.to/nulldutra/disabling-tls-in-argocd-server-4jij
-patchesStrategicMerge:
-- argocd-cmd-params-cm.yaml
+patches:
+- path: argocd-cmd-params-cm.yaml
 # https://argo-cd.readthedocs.io/en/stable/user-guide/kustomize/
-- argocd-cm.yaml
+- path: argocd-cm.yaml

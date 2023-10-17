@@ -21,6 +21,5 @@ images:
 components:
 - https://github.com/argoproj-labs/argocd-extensions/manifests
 
-patchesStrategicMerge:
-- https://raw.githubusercontent.com/argoproj/argo-cd/master/notifications_catalog/install.yaml
-
+patches:
+- path: https://raw.githubusercontent.com/argoproj/argo-cd/master/notifications_catalog/install.yaml

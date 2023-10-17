@@ -1,0 +1,17 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+# add in staging resources
+resources:
+- ../staging
+
+# adding in local service account for GKE connect, not needed if running on GKE
+patches:
+- path: gke-gateway-argocd-server.yaml
+  target:
+    kind: Deployment
+    name: argocd-server
+- path: gke-gateway-argocd-application-controller.yaml
+  target:
+    kind: StatefulSet
+    name: argocd-application-controller

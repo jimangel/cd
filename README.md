@@ -2,6 +2,12 @@
 
 TODO:
 
+- add a makefile to lint cluster values for duplicates (cluster name / server / etc)
+- improve workload selection / declaration + helm values (https://github.com/argoproj/argo-cd/issues/11982 - allow selector + nested helm workload values )
+- add gatekeeper locks to workload definitions
+- create secrets rotation / creation tooling
+- update external secrets to use helm values (simplify setup): https://external-secrets.io/v0.7.0/api/secretstore/
+- Document the service accounts used in GCP / dns a bit better (gcloud iam service-accounts create cloudydemo-dns01-solver + GCP GSM)
 - Move any/all CRDs to a [separate ApplicationSet](https://helm.sh/docs/chart_best_practices/custom_resource_definitions/#install-a-crd-declaration-before-using-the-resource)
 - Warn and fix any gotemplates with no value (using defaults)
 - Use sync waves at the Application and ApplicationSet level to order (like Gateway after Istio)
@@ -12,6 +18,8 @@ TODO:
 - Move HTTPRoutes to respective workload folders (currently created out of band)
 - Diagram areas of importance
 - Markdown table outlining the key areas of a few example workloads (links to specific areas outlining the flow)
+- Identify / diagram non-obvious points of automation (argo-self, repo structure for appset auto-deploy, to delete or not to delete app vs appset, what triggers or syncs when)
+- switch local service account secrets to GSM + External Secrets manager and update readme / setup
 
 ## What this is ("What you get")
 
@@ -149,13 +157,26 @@ Since the first install we "bootstrapped," adding new clusters is a matter of:
 - Add the connection information to a secret in ArgoCD
 - Sync!
 
-Adding a cluster with argocd cli:
+### Adding a cluster with argocd cli:
 
 ```
 curl -sSL -o argocd-linux-amd64 https://github.com/argoproj/argo-cd/releases/latest/download/argocd-linux-amd64
 sudo install -m 555 argocd-linux-amd64 /usr/local/bin/argocd
 rm argocd-linux-amd64
 ```
+
+### Adding GKE Connect Clusters
+
+```
+export Project ID
+
+# create fleet service account for interacting with the clusters
+gcloud iam service-accounts create argocd-fleet-admin --project $PROJECT_ID
+
+gcloud projects add-iam-policy-binding $PROJECT_ID --member "serviceAccount:argocd-fleet-admin@${PROJECT_ID}.iam.gserviceaccount.com" --role roles/gkehub.gatewayEditor
+```
+
+## Login
 
 Get admin password and login:
 
@@ -181,3 +202,7 @@ argocd --port-forward --port-forward-namespace=argocd --kube-context [ARGOCD_KUB
 ## Fork this approach
 
 TBD (one:one / one:many / take-what-you-need)
+
+## Trouble
+
+https://argo-cd.readthedocs.io/en/stable/faq/#argo-cd-is-unable-to-connect-to-my-cluster-how-do-i-troubleshoot-it

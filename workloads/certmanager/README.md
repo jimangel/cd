@@ -8,18 +8,23 @@ Create GCP service account to use (if local) otherwise use workload ID:
 PROJECT_ID=myproject-id
 gcloud iam service-accounts create cloudydemo-dns01-solver --display-name "cloudydemo-dns01-solver"
 
-# grant dns admin
 gcloud projects add-iam-policy-binding $PROJECT_ID \
    --member serviceAccount:cloudydemo-dns01-solver@$PROJECT_ID.iam.gserviceaccount.com \
    --role roles/dns.admin
 
-# get service account
-gcloud iam service-accounts keys create ~/key.json \
+# get service account file
+gcloud iam service-accounts keys create ~/key-gsm.json \
    --iam-account cloudydemo-dns01-solver@$PROJECT_ID.iam.gserviceaccount.com
 
+# create gcp secret
+echo -ne '{"password":"itsasecret"}' | gcloud secrets create mysecret --data-file=-
+
+gcloud iam service-accounts create external-secrets
+
 # create secret
-kubectl -n cert-manager create secret generic clouddns-dns01-solver-svc-acct \
-   --from-file=$HOME/key.json
+kubectl -n cert-manager create secret generic clouddns-dns01-solver-svc-acct --from-file=$HOME/key.json
+
+
 ```
 
 ```

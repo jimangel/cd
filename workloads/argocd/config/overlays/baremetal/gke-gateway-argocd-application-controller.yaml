@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: not-used
+spec:
+  template:
+    spec:
+      volumes:
+      - name: gke-connect-gateway-service-account
+        secret:
+          secretName: gke-connect-gateway-service-account
+      containers:
+      - name: argocd-application-controller
+        volumeMounts:
+        - name: gke-connect-gateway-service-account
+          mountPath: /var/secrets/google
+        env:
+        - name: GOOGLE_APPLICATION_CREDENTIALS
+          value: /var/secrets/google/key.json
