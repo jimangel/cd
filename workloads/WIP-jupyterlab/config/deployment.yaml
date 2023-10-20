@@ -1,0 +1,100 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  labels:
+    kubernetes.io/metadata.name: jupyter-notebook
+  name: jupyter-notebook
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: jupyter-deployment
+  namespace: jupyter-notebook
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: jupyter-notebook
+  template:
+    metadata:
+      labels:
+        app: jupyter-notebook
+    spec:
+      containers:
+      - name: jupyter-container
+        image: jupyter/scipy-notebook:python-3.10.10
+        ports:
+        - containerPort: 8888
+        env:
+        - name: JUPYTER_ENABLE_LAB
+          value: "yes"
+        - name: JUPYTER_TOKEN
+          value: "docker"
+        - name: GRANT_SUDO
+          value: "yes"
+        - name: CHOWN_HOME
+          value: "yes"
+        - name: CHOWN_HOME_OPTS
+          value: "-R"
+        securityContext:
+          runAsUser: 0 # This sets the user to root
+        volumeMounts:
+        - name: workdir
+          mountPath: /home/jovyan/work
+        #  readOnly: true
+      volumes:
+      - name: workdir
+        hostPath:
+          path: /home/jangel/work # Adjust to your path
+          type: DirectoryOrCreate
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: jupyter-service
+  namespace: jupyter-notebook
+spec:
+  type: ClusterIP
+  ports:
+    - port: 8888
+      targetPort: 8888
+  selector:
+    app: jupyter-notebook
+---
+apiVersion: gateway.networking.k8s.io/v1beta1
+kind: HTTPRoute
+metadata:
+  name: jupyter-http-redirect
+  namespace: jupyter-notebook
+spec:
+  parentRefs:
+  - name: cluster-north-south-gateway
+    namespace: istio-gateway
+    port: 80
+  hostnames:
+    - jupyter.gpu-local.cloudydemo.com
+  rules:
+    - filters:
+        - type: RequestRedirect
+          requestRedirect:
+            scheme: https
+            statusCode: 301
+---
+apiVersion: gateway.networking.k8s.io/v1beta1
+kind: HTTPRoute
+metadata:
+  name: jupyter-https-ui
+  namespace: jupyter-notebook
+spec:
+  parentRefs:
+  - name: cluster-north-south-gateway
+    namespace: istio-gateway
+    port: 443
+  hostnames:
+    - jupyter.gpu-local.cloudydemo.com
+  rules:
+  -  backendRefs:
+     - group: ""
+       kind: Service
+       name: jupyter-service
+       port: 8888
