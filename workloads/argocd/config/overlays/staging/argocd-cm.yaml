@@ -6,6 +6,10 @@ metadata:
   name: argocd-cm
   namespace: argocd
 data:
+  # Application reconciliation timeout is the max amount of time required to discover if a new manifests version got
+  # published to the repository. Reconciliation by timeout is disabled if timeout is set to 0. Three minutes by default.
+  # > Note: argocd-repo-server deployment must be manually restarted after changing the setting.
+  timeout.reconciliation: "0"
   kustomize.buildOptions: --enable-helm
   # https://github.com/istio/istio/issues/44285
   # https://github.com/argoproj/argo-cd/issues/4276#issuecomment-1328165733
@@ -16,3 +20,36 @@ data:
     jqPathExpressions:
     - .webhooks[0].clientConfig.caBundle
     - .webhooks[0].failurePolicy
+  # TODO: eval if there's a way to reduce add-ons manager after seeing impact to stopping polling.
+  #  managedFieldsManagers:
+  #  - kube-controller-manager
+
+
+
+ 
+  # enable for the following feature
+  # https://argo-cd.readthedocs.io/en/stable/operator-manual/reconcile/#system-level-configuration
+  # resource.ignoreResourceUpdatesEnabled: "true"
+
+  # https://argo-cd.readthedocs.io/en/stable/operator-manual/reconcile/
+  # TODO: try after stopping polling
+  #resource.customizations.ignoreResourceUpdates.all: |
+  #  jsonPointers:
+  #  - /status
+
+
+
+
+
+  # THIS IS TO AVOID LOTS OF GKE CONNECT CALLS (LIMIT CRD PATCH WATCHING)
+  # Configuration to completely ignore entire classes of resource group/kinds (optional).
+  # Excluding high-volume resources improves performance and memory usage, and reduces load and
+  # bandwidth to the Kubernetes API server.
+  # These are globs, so a "*" will match all values.
+  # If you omit groups/kinds/clusters then they will match all groups/kind/clusters.
+  # NOTE: events.k8s.io and metrics.k8s.io are excluded by default
+  #resource.exclusions: |
+  #  - apiGroups:
+  #    - apiextensions.k8s.io/v1
+  #    kinds:
+  #    - CustomResourceDefinition
