@@ -9,7 +9,7 @@ data:
   # Application reconciliation timeout is the max amount of time required to discover if a new manifests version got
   # published to the repository. Reconciliation by timeout is disabled if timeout is set to 0. Three minutes by default.
   # > Note: argocd-repo-server deployment must be manually restarted after changing the setting.
-  timeout.reconciliation: "0"
+  timeout.reconciliation: "5s"
   kustomize.buildOptions: --enable-helm
   # https://github.com/istio/istio/issues/44285
   # https://github.com/argoproj/argo-cd/issues/4276#issuecomment-1328165733
