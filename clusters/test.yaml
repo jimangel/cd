@@ -1,6 +1,6 @@
 cluster:
   # try to match name in ArgoCD or planned name
-  name: cluster-app
+  name: in-cluster
   # for applicationset names generally
   friendlyName: "gke-dev"
   # use https://kubernetes.default.svc for local argo
