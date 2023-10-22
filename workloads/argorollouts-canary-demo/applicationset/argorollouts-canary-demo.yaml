@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: ApplicationSet
 metadata:
-  name: argrollouts-canary-demo
+  name: argorollouts-canary-demo
   namespace: argocd
 spec:
   goTemplate: true
@@ -16,10 +16,10 @@ spec:
       revision: HEAD
     selector:
       matchLabels:
-        workloads.argrollouts-canary-demo: "deployed"
+        workloads.argorollouts-canary-demo: "deployed"
   template:
     metadata:
-      name: 'argrollouts-canary-demod-{{ if eq .cluster.name "in-cluster" }}local{{ else }}{{ .cluster.friendlyName }}{{ end }}'
+      name: 'argorollouts-canary-demo-{{ if eq .cluster.name "in-cluster" }}local{{ else }}{{ .cluster.friendlyName }}{{ end }}'
       finalizers:
       - "resources-finalizer.argocd.argoproj.io"
       labels:
@@ -35,12 +35,12 @@ spec:
       # using a kustomized helm chart to include env var for gateway api
       - repoURL: https://github.com/jimangel/cd.git
         targetRevision: HEAD
-        path: workloads/argrollouts-canary-demo/config/overlays/base
+        path: workloads/argorollouts-canary-demo/config/overlays/base
         #kustomize:
           #patches:
           #- target:
           #    kind: Deployment
-          #    name: argrollouts-canary-demod
+          #    name: argorollouts-canary-demod
           #  patch: |
           #    - op: add
           #      path: "/spec/template/spec/containers/0/env/-"

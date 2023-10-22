@@ -19,7 +19,7 @@ spec:
         workloads.argorollouts: "deployed"
   template:
     metadata:
-      name: 'argorolloutsd-{{ if eq .cluster.name "in-cluster" }}local{{ else }}{{ .cluster.friendlyName }}{{ end }}'
+      name: 'argorollouts-{{ if eq .cluster.name "in-cluster" }}local{{ else }}{{ .cluster.friendlyName }}{{ end }}'
       finalizers:
       - "resources-finalizer.argocd.argoproj.io"
       labels:
