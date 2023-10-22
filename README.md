@@ -2,6 +2,7 @@
 
 TODO:
 
+- test
 - add a makefile to lint cluster values for duplicates (cluster name / server / etc)
 - improve workload selection / declaration + helm values (https://github.com/argoproj/argo-cd/issues/11982 - allow selector + nested helm workload values )
 - add gatekeeper locks to workload definitions
