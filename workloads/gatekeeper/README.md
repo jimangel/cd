@@ -1,0 +1,1 @@
+kubectl apply -f workloads/gatekeeper/config/raw/constraints/deny-non-default-argocd-project.yaml

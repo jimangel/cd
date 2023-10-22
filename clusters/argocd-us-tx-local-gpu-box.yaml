@@ -28,3 +28,4 @@ workloads:
   gatekeeper: deployed
   kube-prometheus-stack: deployed
   workloads.argrollouts-canary-demo: deployed
+  argorollouts: deployed
