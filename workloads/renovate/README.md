@@ -1,0 +1,1 @@
+kubectl apply -Rf workloads/renovate/config/raw
