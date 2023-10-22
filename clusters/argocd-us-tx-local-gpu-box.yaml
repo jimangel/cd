@@ -27,5 +27,5 @@ workloads:
   external-secrets-operator: deployed
   gatekeeper: deployed
   kube-prometheus-stack: deployed
-  workloads.argorollouts-canary-demo: deployed
+  argorollouts-canary-demo: deployed
   argorollouts: deployed

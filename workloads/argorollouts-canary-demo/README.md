@@ -1,1 +1,1 @@
-kustomize build workloads/argorollouts-canary-demo/config/base/
+kustomize build workloads/argorollouts-canary-demo/config/overlays/base/

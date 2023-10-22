@@ -1,1 +1,1 @@
-kustomize build workloads/argorollouts/applicaitonset/config/overlays/base/
+kustomize build workloads/argorollouts/config/overlays/base/
