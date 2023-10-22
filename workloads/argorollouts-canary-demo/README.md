@@ -1,0 +1,1 @@
+kustomize build workloads/argorollouts-canary-demo/config/base/

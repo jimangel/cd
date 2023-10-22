@@ -1,6 +1,6 @@
 # run locally
 
-helm template workloads/kube-prometheus-stack/config/helm-local-chart
+helm template workloads/kube-prometheus-stack/config/addon-chart-gateway
 
 # grafana login
 
