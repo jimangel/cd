@@ -32,24 +32,12 @@ spec:
     spec:
       project: default
       sources:
-      # using a kustomized helm chart to include env var for gateway api
       - repoURL: https://github.com/jimangel/cd.git
         targetRevision: HEAD
         path: workloads/argorollouts-canary-demo/config/overlays/base
-        #kustomize:
-          #patches:
-          #- target:
-          #    kind: Deployment
-          #    name: argorollouts-canary-demod
-          #  patch: |
-          #    - op: add
-          #      path: "/spec/template/spec/containers/0/env/-"
-          #      value:
-          #        name: PILOT_ENABLE_ALPHA_GATEWAY_API
-          #        value: "true"
       destination:
         name: '{{ .cluster.name }}'
-        namespace: 'argo-rollouts'
+        namespace: 'argorollouts-demo'
       syncPolicy:
         automated: {}
         syncOptions:
