@@ -37,8 +37,6 @@ echo -ne '{"password":"itsasecret"}' | gcloud secrets create mysecret --data-fil
 export EMAIL="emailaddress@example.com"
 export PROJECT_ID=myproject-id
 
-
-
 cat <<EOF | kubectl apply -f -
 apiVersion: external-secrets.io/v1beta1
 kind: ClusterSecretStore

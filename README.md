@@ -143,12 +143,12 @@ gcloud secrets add-iam-policy-binding gh-webhook-string --member "serviceAccount
 # create external secrets to append
 
 
-cat <<EOF | kubectl delete -f -
+cat <<EOF | kubectl apply -f -
 apiVersion: external-secrets.io/v1beta1
 kind: ExternalSecret
 metadata:
   name: github-webhook-password
-  namespace: external-secrets
+  namespace: argocd
 spec:
   secretStoreRef:
     kind: ClusterSecretStore
@@ -157,7 +157,7 @@ spec:
     name: argocd-secret
     creationPolicy: Merge
   data:
-  - secretKey: webhook.github.secret
+  - secretKey: "webhook.github.secret"
     remoteRef:
       key: gh-webhook-string
 EOF
@@ -165,6 +165,16 @@ EOF
 
 # validate
 kubectl get secret argocd-secret -n argocd -oyaml
+
+export GITHUB_HOOK_URL="https://external-domain.example.com"
+
+# returns 400 because not a "real" webhook event
+curl -s -o /dev/null -w "%{http_code}" -d '{}' ${GITHUB_HOOK_URL}
+
+# returns 200 because it's a "real" webhook event (ping)
+curl -s -o /dev/null -w "%{http_code}" -H 'X-GitHub-Event: ping' -d '{}' ${GITHUB_HOOK_URL} 
+
+# the first one produces no logs, the second one produces "Ignoring webhook event" in the logs of the argocd-server.
 
 
 # reboot argocd
