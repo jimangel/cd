@@ -71,6 +71,10 @@ NOTE: added "contents" in addition for permissions (THIS IS IMPORTANT!!):
 
 ![Alt text](scripts/img/image.png)
 
+Security branch settings / lint requirements:
+
+![Alt text](scripts/img/image-3.png)
+
 ## Setup git repo to use GitHub App credentials
 
 ```
