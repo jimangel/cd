@@ -20,6 +20,7 @@ TODO:
 - Markdown table outlining the key areas of a few example workloads (links to specific areas outlining the flow)
 - Identify / diagram non-obvious points of automation (argo-self, repo structure for appset auto-deploy, to delete or not to delete app vs appset, what triggers or syncs when)
 - switch local service account secrets to GSM + External Secrets manager and update readme / setup
+- add linting to check for matching selectors before applying
 
 ## What this is ("What you get")
 

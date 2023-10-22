@@ -1,0 +1,66 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: echo-server-ci-appset
+  namespace: argocd
+spec:
+  goTemplate: true
+  # we default the destination to be itself...
+  generators:
+    - matrix:
+        # Create a staging deployment if PR with a label "ok-to-stage" found.
+        generators:
+          - git:
+              files:
+              - path: clusters/*.yaml
+              repoURL: "https://github.com/jimangel/cd.git"
+              revision: HEAD
+            selector:
+              matchLabels:
+                themes.role: "ci"
+          - pullRequest:
+              github:
+                owner: jimangel
+                repo: cd
+                labels:
+                - ok-to-stage
+                # Reference to a Secret containing an access token. (optional - since we are using GH App)
+                #tokenRef:
+                #  secretName: github-token
+                #  key: token
+  template:
+    metadata:
+      # lowercase RFC 1123 subdomain must consist of lower case alphanumeric characters, '-' or '.', and must start and end with an alphanumeric character (e.g. 'example.com', regex used for validation is '[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*')
+      name: 'pr-echo-server-{{ if eq .cluster.name "in-cluster" }}local{{ else }}{{ .cluster.friendlyName }}{{ end }}-{{ .head_short_sha_7 }}'
+      annotations:
+        # The GitHub notification service changes commit status using GitHub Apps
+        notifications.argoproj.io/subscribe.on-sync-succeeded.github: ""
+      finalizers:
+      - "resources-finalizer.argocd.argoproj.io"
+      labels:
+        workloadType: PR
+        # document what selectors are used
+        environment: "{{ .themes.environment }}"
+        # how is this workload deployed in argocd?
+        syncType: "helm-local"
+        # for quick ref
+        cluster: "{{ .cluster.friendlyName }}"
+    spec:
+      project: default
+      sources:
+      # install argo-cd matching what we did with helm-ish...
+      - repoURL: "https://github.com/jimangel/cd.git"
+        targetRevision: HEAD
+        helm:
+          releaseName: 'test-{{ .head_short_sha_7 }}'
+          values: |
+            containerName: testing-{{ .head_short_sha_7 }}
+        path: workloads/echo-server/config/local-helm
+      destination:
+        #server: '{{ .cluster.server }}'
+        name: '{{ .cluster.name }}'
+        namespace: 'echo-ci'
+      syncPolicy:
+        automated: {}
+        syncOptions:
+          - CreateNamespace=true
