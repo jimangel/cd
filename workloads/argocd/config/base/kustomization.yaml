@@ -21,6 +21,7 @@ images:
 
 components:
 - https://github.com/argoproj-labs/argocd-extensions/manifests
+- https://github.com/argoproj/argo-rollouts/manifests/crds\?ref\=stable
 
 patches:
 - path: https://raw.githubusercontent.com/argoproj/argo-cd/master/notifications_catalog/install.yaml
