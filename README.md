@@ -122,6 +122,54 @@ kubectl -n argocd get secrets argocd-initial-admin-secret \
 kubectl port-forward svc/argocd-server -n argocd 8080:80
 ```
 
+## Webhook config
+
+Expose /api/webhook (details in "rotate secrets" script for local / ngrok)
+
+```
+# Create webhook secret
+echo -ne '123HA$H123' | gcloud secrets create gh-webhook-string --data-file=-
+
+
+
+echo -ne '{"password2":"itsasecret2"}' | gcloud secrets create gh-webhook-string --data-file=-
+
+
+export PROJECT_ID=YOUR_PROJECT
+gcloud secrets add-iam-policy-binding gh-webhook-string --member "serviceAccount:cloudydemo-secret-admin@$PROJECT_ID.iam.gserviceaccount.com" --role "roles/secretmanager.secretAccessor"
+
+
+
+# create external secrets to append
+
+
+cat <<EOF | kubectl delete -f -
+apiVersion: external-secrets.io/v1beta1
+kind: ExternalSecret
+metadata:
+  name: github-webhook-password
+  namespace: external-secrets
+spec:
+  secretStoreRef:
+    kind: ClusterSecretStore
+    name: gcp-backend
+  target:
+    name: argocd-secret
+    creationPolicy: Merge
+  data:
+  - secretKey: webhook.github.secret
+    remoteRef:
+      key: gh-webhook-string
+EOF
+
+
+# validate
+kubectl get secret argocd-secret -n argocd -oyaml
+
+
+# reboot argocd
+```
+
 ## How to debug workloads
 
 ```

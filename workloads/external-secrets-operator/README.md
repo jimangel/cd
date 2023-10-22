@@ -73,4 +73,6 @@ EOF
 
 # test / validate
 kubectl -n external-secrets get secret secret-to-be-created -o jsonpath='{.data.yolo\.org}' | base64 -d
+
+gcloud secrets list
 ```
