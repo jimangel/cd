@@ -1,0 +1,14 @@
+apiVersion: constraints.gatekeeper.sh/v1beta1
+kind: ApplicationSetDefaultProject
+metadata:
+  name: applicationset-default-project
+  # https://github.com/argoproj/argo-cd/issues/9252#issuecomment-1624331011
+  annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    argocd.argoproj.io/sync-wave: "1"
+spec:
+  enforcementAction: deny
+  match:
+    kinds:
+      - apiGroups: ["argoproj.io"]
+        kinds: ["ApplicationSet"]
