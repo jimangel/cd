@@ -1,5 +1,5 @@
 cluster:
-  # try to match name in ArgoCD or planned name
+  # try to match name in ArgoCD or planned nam
   name: in-cluster
   # for applicationset names generally
   friendlyName: "gpu-box"
