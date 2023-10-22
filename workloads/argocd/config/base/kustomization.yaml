@@ -11,6 +11,7 @@ resources:
 - namespace.yaml
 - restart-argocd.yaml
 
+
 ##########################################
 ## SET RELEASE ABOVE AND BELOW FOR TESTING
 ##########################################
@@ -24,3 +25,4 @@ components:
 
 patches:
 - path: https://raw.githubusercontent.com/argoproj/argo-cd/master/notifications_catalog/install.yaml
+- path: argocd-notifications.yaml

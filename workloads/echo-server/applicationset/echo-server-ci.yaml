@@ -34,7 +34,8 @@ spec:
       name: 'pr-echo-server-{{ if eq .cluster.name "in-cluster" }}local{{ else }}{{ .cluster.friendlyName }}{{ end }}-{{ .head_short_sha_7 }}'
       annotations:
         # The GitHub notification service changes commit status using GitHub Apps
-        notifications.argoproj.io/subscribe.on-sync-succeeded.github: ""
+        notifications.argoproj.io/subscribe.on-sync-succeeded.github: "github.com/jimangel/cd"
+        notifications.argoproj.io/subscribe.sync-operation-change.github: "github.com/jimangel/cd"
       finalizers:
       - "resources-finalizer.argocd.argoproj.io"
       labels:
