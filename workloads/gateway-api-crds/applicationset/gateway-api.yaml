@@ -19,6 +19,9 @@ spec:
         workloads.gateway-api-crds: "deployed"
   template:
     metadata:
+      annotations:
+        # PRIORITIZE CRD CHANGES BEFORE APPLICATION CHANGES
+        argocd.argoproj.io/sync-wave: "-1"
       name: 'gateway-api-crds-{{ if eq .cluster.name "in-cluster" }}local{{ else }}{{ .cluster.friendlyName }}{{ end }}'
       labels:
         workloadType: networking
