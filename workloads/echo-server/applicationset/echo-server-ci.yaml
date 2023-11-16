@@ -24,10 +24,12 @@ spec:
                 repo: cd
                 labels:
                 - ok-to-stage
-                # Reference to a Secret containing an access token. (optional - since we are using GH App)
+                # Reference to a Secret containing an access token.
                 #tokenRef:
                 #  secretName: github-token
                 #  key: token
+                # (optional) use a GitHub App to access the API instead of a PAT.
+                appSecretName: github-app-repo
   template:
     metadata:
       # lowercase RFC 1123 subdomain must consist of lower case alphanumeric characters, '-' or '.', and must start and end with an alphanumeric character (e.g. 'example.com', regex used for validation is '[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*')
