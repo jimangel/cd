@@ -35,7 +35,7 @@ spec:
       # using a kustomized helm chart to include env var for gateway api
       - repoURL: https://github.com/jimangel/cd.git
         targetRevision: HEAD
-        path: workloads/argorollouts/config/overlays/base
+        path: workloads/argorollouts/config/base
         #kustomize:
           #patches:
           #- target:

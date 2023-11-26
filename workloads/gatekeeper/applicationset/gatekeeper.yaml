@@ -22,7 +22,7 @@ spec:
         # document what selectors are used
         environment: "{{ .themes.environment }}"
         # how is this workload deployed in argocd?
-        syncType: "helm-remote"
+        syncType: "helm-remote-plus-yaml-local"
         # for quick ref
         cluster: "{{ .cluster.friendlyName }}"
       finalizers:
