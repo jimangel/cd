@@ -1,0 +1,78 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: gateway-north-south
+  namespace: argocd
+spec:
+  goTemplate: true
+  generators:
+  - git:
+      files:
+      - path: clusters/*.yaml
+      repoURL: "https://github.com/jimangel/cd.git"
+      revision: HEAD
+    selector:
+      matchLabels:
+        workloads.gateway-north-south: "deployed"
+  template:
+    metadata:
+      name: 'gateway-north-south-{{ if eq .cluster.name "in-cluster" }}local{{ else }}{{ .cluster.friendlyName }}{{ end }}'
+      labels:
+        workloadType: networking
+        environment: "{{ .themes.environment }}"
+        provider: "{{ .themes.provider }}"
+        # how is this workload deployed in argocd?
+        syncType: "kustomize-nested-helm-remote"
+        # for quick ref
+        cluster: "{{ .cluster.friendlyName }}"
+      finalizers:
+      - "resources-finalizer.argocd.argoproj.io"
+    spec:
+      project: default
+      sources:
+      - chart: out-of-pocket-cloudlab/helm-charts/unofficial-gateway-api
+        repoURL: us-central1-docker.pkg.dev
+        targetRevision: 0.1.1
+        helm:
+          values: |
+            gateway:
+              enabled: true
+              class: "istio"
+              annotations: {}
+              addresses:
+              - type: Hostname
+                value: "north-south-gateway.istio-gateway.svc.cluster.local"
+              listeners:
+              - name: http
+                protocol: HTTP
+                port: 80
+                hostname: '*.gpu-local.cloudydemo.com'
+                allowedRoutes:
+                  kinds:
+                    - kind: HTTPRoute
+                  namespaces:
+                    from: All
+              - name: https
+                protocol: HTTPS
+                port: 443
+                hostname: '*.gpu-local.cloudydemo.com'
+                tls:
+                  mode: Terminate
+                  certificateRefs:
+                  - name: gateway-http-https-wildcard-cert
+                allowedRoutes:
+                  kinds:
+                  - kind: HTTPRoute
+                  namespaces:
+                    from: All
+      destination:
+        name: '{{ .cluster.name }}'
+        namespace: 'istio-gateway'
+      syncPolicy:
+        automated: {}
+        managedNamespaceMetadata:
+          # kubectl label namespace default istio-injection=enabled
+          labels:
+            istio-injection: enabled
+        syncOptions:
+          - CreateNamespace=true

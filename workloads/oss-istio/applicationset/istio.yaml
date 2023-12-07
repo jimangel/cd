@@ -16,7 +16,7 @@ spec:
       revision: HEAD
     selector:
       matchLabels:
-        workloads.istio: "deployed"
+        workloads.oss-istio: "deployed"
   template:
     metadata:
       name: 'istiod-{{ if eq .cluster.name "in-cluster" }}local{{ else }}{{ .cluster.friendlyName }}{{ end }}'
@@ -35,7 +35,7 @@ spec:
       # using a kustomized helm chart to include env var for gateway api
       - repoURL: https://github.com/jimangel/cd.git
         targetRevision: HEAD
-        path: workloads/istio/config/overlays/{{ .themes.environment }}
+        path: workloads/oss-istio/config/overlays/{{ .themes.environment }}
         kustomize:
           patches:
           - target:

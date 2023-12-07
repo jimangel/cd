@@ -39,7 +39,7 @@ kubectl -n istio-system kustomize --enable-helm .
 ## Run locally
 
 ```
-kustomize build --enable-helm workloads/istio/config/kustomized-helm/
+kustomize build --enable-helm workloads/oss-istio/config/overlays/staging
 
 
       ignoreDifferences:

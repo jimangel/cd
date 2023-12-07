@@ -1,13 +1,16 @@
 The central point of traffic ingress / egress
 
-TODO: chunk out domain naming better (automatic per cluster, with cert manager, etc)
+## Test
 
-## I think not needed with k8s gateway api
+```
+kustomize build workloads/gateway-north-south/config/overlays/baremetal --enable-helm
 
-k8s gateway api creates the resource and stuff...
+or
 
-This directory contains all gateway related objects (today for Istio)
+kubectl kustomize workloads/gateway-north-south/config/overlays/baremetal --enable-helm
+```
 
+## DELETE BELOW:
 
 ```
 # from: https://istio.io/latest/docs/setup/additional-setup/getting-started/

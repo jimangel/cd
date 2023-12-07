@@ -1,5 +1,11 @@
 namespace: istio-gateway
 
+helmCharts:
+- name: gateway
+  version: 1.19.2
+  repo: https://istio-release.storage.googleapis.com/charts
+  releaseName: north-south-gateway
+
 resources:
 - ../../base
 - gateway.yaml

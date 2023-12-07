@@ -20,9 +20,9 @@ workloads:
   echo-server: deployed
   gateway-api-crds: deployed
   # like ingress, this is the north south ingress "Gateway API" gateway
-  gateway-api-istio-ingress: deployed
+  gateway-north-south: deployed
   certmanager: deployed
-  istio: deployed
+  oss-istio: deployed
   metrics-server: deployed
   external-secrets-operator: deployed
   gatekeeper: deployed
