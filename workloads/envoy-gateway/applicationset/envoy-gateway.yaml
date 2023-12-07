@@ -1,0 +1,52 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: envoy-gateway
+  namespace: argocd
+spec:
+  goTemplate: true
+  generators:
+  - git:
+      files:
+      - path: clusters/*.yaml
+      repoURL: "https://github.com/jimangel/cd.git"
+      revision: HEAD
+    selector:
+      matchLabels:
+        workloads.envoy-gateway: "deployed"
+  template:
+    metadata:
+      name: 'envoy-gateway-{{ if eq .cluster.name "in-cluster" }}local{{ else }}{{ .cluster.friendlyName }}{{ end }}'
+      labels:
+        workloadType: networking
+        # document what selectors are used
+        environment: "{{ .themes.environment }}"
+        # how is this workload deployed in argocd?
+        syncType: "helm-remote"
+        # for quick ref
+        cluster: "{{ .cluster.friendlyName }}"
+      finalizers:
+      - "resources-finalizer.argocd.argoproj.io"
+    spec:
+      project: default
+      sources:
+      - chart: envoyproxy/gateway-helm
+        repoURL: docker.io
+        targetRevision: 'v0.6.0'
+        helm:
+          releaseName: eg
+          #skipCrds: true
+          # we had to add these sync policies otherwise ArgoCD would hang (see: https://github.com/argoproj/argo-cd/discussions/8247)
+          values: |
+            certgen:
+              job:
+                annotations:
+                  argocd.argoproj.io/hook: Sync
+                  argocd.argoproj.io/hook-delete-policy: HookSucceeded
+      destination:
+        name: '{{ .cluster.name }}'
+        namespace: 'envoy-gateway-system'
+      syncPolicy:
+        automated: {}
+        syncOptions:
+          - CreateNamespace=true

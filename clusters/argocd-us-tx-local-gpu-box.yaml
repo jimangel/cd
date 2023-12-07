@@ -22,7 +22,8 @@ workloads:
   # like ingress, this is the north south ingress "Gateway API" gateway
   gateway-north-south: deployed
   certmanager: deployed
-  oss-istio: deployed
+  #oss-istio: deployed
+  envoy-gateway: deployed
   metrics-server: deployed
   external-secrets-operator: deployed
   gatekeeper: deployed
