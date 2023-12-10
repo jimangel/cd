@@ -21,7 +21,7 @@ spec:
     metadata:
       # No need for a unique name, there should only be one per "area" of management
       # argo can share same repo, but see itself
-      name: '01-self-managed-argo'
+      name: '01-self-managed-argo-{{ if eq .cluster.name "in-cluster" }}local{{ else }}{{ .cluster.friendlyName }}{{ end }}'
       annotations:
         link.argocd.argoproj.io/external-link: http://test.com/test
       finalizers:
