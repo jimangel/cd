@@ -1,29 +1,13 @@
 ## Install argo
 TODO:
 
-- add charts to remote git-ignore for future deletion
-- update namespace for `gateway` on GKE to "work" (or mirror istio setup? Maybe rewire istio for more standard approach...)
-- move httproutes to respective workloads
 - improve workload selection / declaration + helm values (https://github.com/argoproj/argo-cd/issues/11982 - allow selector + nested helm workload values )
-- add gatekeeper locks to workload definitions
 - create secrets rotation / creation tooling
 - update external secrets to use helm values (simplify setup): https://external-secrets.io/v0.7.0/api/secretstore/
 - Document the service accounts used in GCP / dns a bit better (gcloud iam service-accounts create cloudydemo-dns01-solver + GCP GSM)
-- Move any/all CRDs to a <0 sync wave (if needed, create 2 sources)
-- Warn and fix any gotemplates with no value (using defaults)
-- Use sync waves at the Application and ApplicationSet level to order (like Gateway after Istio)
 - Move certmanager secret to git (`kubectl -n cert-manager create secret generic clouddns-dns01-solver-svc-acct --from-file=$HOME/key.json`)
   - Add additional certmanager resources to workload (cluster issuer, wildcard requests, etc)
-- Add support for workload ID (certmanager, argo, etc)
-- Validate that domains are not hardcoded/set in any low-level yaml
-- Move HTTPRoutes to respective workload folders (currently created out of band)
-- Diagram areas of importance
-- Markdown table outlining the key areas of a few example workloads (links to specific areas outlining the flow)
-- Identify / diagram non-obvious points of automation (argo-self, repo structure for appset auto-deploy, to delete or not to delete app vs appset, what triggers or syncs when)
-- switch local service account secrets to GSM + External Secrets manager and update readme / setup
-- add linting to check for matching selectors before applying
 - move `environments` config for appset into "config" directory and update kube-prometheus-stack
-- create a centralized override yaml for version upgrades (like argocd not changed in 2 places)
 - rename or append 01, 02 to high priority workloads / sync wave (like argoCD -> secrets -> istio -> gateway -> certs etc)
 
 ## Install / boostrap ArgoCD with Kustomize

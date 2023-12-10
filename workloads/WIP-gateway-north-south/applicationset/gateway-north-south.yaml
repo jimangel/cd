@@ -37,11 +37,8 @@ spec:
           values: |
             gateway:
               enabled: true
-              class: "istio"
+              class: "eg"
               annotations: {}
-              addresses:
-              - type: Hostname
-                value: "north-south-gateway.istio-gateway.svc.cluster.local"
               listeners:
               - name: http
                 protocol: HTTP
