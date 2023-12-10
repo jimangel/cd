@@ -1,5 +1,4 @@
 ## Install argo
-
 TODO:
 
 - add charts to remote git-ignore for future deletion
@@ -26,35 +25,6 @@ TODO:
 - move `environments` config for appset into "config" directory and update kube-prometheus-stack
 - create a centralized override yaml for version upgrades (like argocd not changed in 2 places)
 - rename or append 01, 02 to high priority workloads / sync wave (like argoCD -> secrets -> istio -> gateway -> certs etc)
-
-## Workload breakdown
-
-| Workload Name             | Sync Wave | Sync Type                    | Core Config                                                                                           | Custom Shared Config                                                                                                                                                     | README.md                                             |
-|---------------------------|-----------|------------------------------|-------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------|
-| argocd                    | 0         | kustomize                    | [base/](workloads/argocd/config/base/)                                                                | [overlays/](workloads/argocd/config/overlays/) (Metal, GKE)                                                                                                              | [link](workloads/argocd/README.md)                    |
-| argorollouts              | 0         | kustomize-remote             | [base/](workloads/argorollouts/config/base/)                                                          | n/a                                                                                                                                                                      | [link](workloads/argorollouts/README.md)              |
-| certmanager               | 0         | helm-remote                  | (Helm URL in AppSet)                                                                                  | n/a                                                                                                                                                                      | [link](workloads/certmanager/README.md)               |
-| echo-server               | 0         | helm-local                   | [local-helm/](workloads/echo-server/config/local-helm)                                                | n/a                                                                                                                                                                      | [link](workloads/echo-server/README.md)               |
-| external-secrets-operator | 0         | helm-remote                  | (Helm URL in AppSet)                                                                                  | n/a                                                                                                                                                                      | [link](workloads/external-secrets-operator/README.md) |
-| gatekeeper                | 0         | helm-remote-plus-yaml-local  | (Helm URL in AppSet), [raw/](workloads/gatekeeper/config/raw/) (yaml)                                        | n/a                                                                                                                                                                      | [link](workloads/gatekeeper/README.md)                |
-| gateway-api-crds          | -1        | kustomize-remote             | [base/](workloads/gateway-api-crds/config/base/)                                                      | [overlays/](workloads/gateway-api-crds/config/overlays/) (Staging)                                                                                                       | [link](workloads/gateway-api-crds/README.md)          |
-| gateway-api-istio-ingress | 0         | kustomize                    | (GitHub URL in AppSet)                                                                                | [overlays/](workloads/gateway-api-istio-ingress/config/overlays/) (Staging)                                                                                              | [link](workloads/gateway-api-istio-ingress/README.md) |
-| oss-istio                     | 0         | kustomize-nested-helm-remote | [base/](workloads/istio/config/base/)                                                        | [overlays/](workloads/istio/config/overlays/) (Not In Use)                                                                                                               | [link](workloads/istio/README.md)                     |
-| kube-prometheus-stack     | 0         | helm-remote-plus-helm-local  | (Helm URL in AppSet) | [environments/](workloads/kube-prometheus-stack/applicationset/environment) (Prod / Staging), ([addon-chart-gateway/](workloads/kube-prometheus-stack/config/addon-chart-gateway) & [helm-values/](workloads/kube-prometheus-stack/config/helm-values)) | [link](workloads/kube-prometheus-stack/README.md)     |
-| metrics-server            | 0         | helm-remote                  | (Helm URL in AppSet)                                                                                  | n/a                                                                                                                                                                      | [link](workloads/kube-prometheus-stack/README.md)     |
-
-## Important concepts
-- IF YOU USE IT, LABEL IT (label application CRDs with the selectors used so it's easy to debug ... for filtering, searching, etc)
-- flat structure for easy debugging (clusters or workloads)
-- clusters opt-in to workloads
-- the config for workloads should be similar in structure
-  - kustomize have base / overlays
-  - helm has values files for env
-- do yourself a favor, document how to test local workloads in the folder (README.md).
-  - Include why's, hows, and whats
-  - Maybe include a bash one-liner to show what values are used (grep + bash on the cluster struct or appset)
-
-Best approach is creating a lower environment and playing "wide open"
 
 ## Install / boostrap ArgoCD with Kustomize
 
@@ -152,18 +122,12 @@ Expose /api/webhook (details in "rotate secrets" script for local / ngrok)
 # Create webhook secret
 echo -ne '123HA$H123' | gcloud secrets create gh-webhook-string --data-file=-
 
-
-
 echo -ne '{"password2":"itsasecret2"}' | gcloud secrets create gh-webhook-string --data-file=-
-
 
 export PROJECT_ID=YOUR_PROJECT
 gcloud secrets add-iam-policy-binding gh-webhook-string --member "serviceAccount:cloudydemo-secret-admin@$PROJECT_ID.iam.gserviceaccount.com" --role "roles/secretmanager.secretAccessor"
 
-
-
 # create external secrets to append
-
 
 cat <<EOF | kubectl apply -f -
 apiVersion: external-secrets.io/v1beta1
@@ -184,7 +148,6 @@ spec:
       key: gh-webhook-string
 EOF
 
-
 # validate
 kubectl get secret argocd-secret -n argocd -oyaml
 
@@ -198,9 +161,38 @@ curl -s -o /dev/null -w "%{http_code}" -H 'X-GitHub-Event: ping' -d '{}' ${GITHU
 
 # the first one produces no logs, the second one produces "Ignoring webhook event" in the logs of the argocd-server.
 
-
 # reboot argocd
 ```
+
+## Workload breakdown
+
+| Workload Name             | Sync Wave | Sync Type                    | Core Config                                                                                           | Custom Shared Config                                                                                                                                                     | README.md                                             |
+|---------------------------|-----------|------------------------------|-------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------|
+| argocd                    | 0         | kustomize                    | [base/](workloads/argocd/config/base/)                                                                | [overlays/](workloads/argocd/config/overlays/) (Metal, GKE)                                                                                                              | [link](workloads/argocd/README.md)                    |
+| argorollouts              | 0         | kustomize-remote             | [base/](workloads/argorollouts/config/base/)                                                          | n/a                                                                                                                                                                      | [link](workloads/argorollouts/README.md)              |
+| certmanager               | 0         | helm-remote                  | (Helm URL in AppSet)                                                                                  | n/a                                                                                                                                                                      | [link](workloads/certmanager/README.md)               |
+| echo-server               | 0         | helm-local                   | [local-helm/](workloads/echo-server/config/local-helm)                                                | n/a                                                                                                                                                                      | [link](workloads/echo-server/README.md)               |
+| external-secrets-operator | 0         | helm-remote                  | (Helm URL in AppSet)                                                                                  | n/a                                                                                                                                                                      | [link](workloads/external-secrets-operator/README.md) |
+| gatekeeper                | 0         | helm-remote-plus-yaml-local  | (Helm URL in AppSet), [raw/](workloads/gatekeeper/config/raw/) (yaml)                                        | n/a                                                                                                                                                                      | [link](workloads/gatekeeper/README.md)                |
+| gateway-api-crds          | -1        | kustomize-remote             | [base/](workloads/gateway-api-crds/config/base/)                                                      | [overlays/](workloads/gateway-api-crds/config/overlays/) (Staging)                                                                                                       | [link](workloads/gateway-api-crds/README.md)          |
+| gateway-api-istio-ingress | 0         | kustomize                    | (GitHub URL in AppSet)                                                                                | [overlays/](workloads/gateway-api-istio-ingress/config/overlays/) (Staging)                                                                                              | [link](workloads/gateway-api-istio-ingress/README.md) |
+| oss-istio                     | 0         | kustomize-nested-helm-remote | [base/](workloads/istio/config/base/)                                                        | [overlays/](workloads/istio/config/overlays/) (Not In Use)                                                                                                               | [link](workloads/istio/README.md)                     |
+| kube-prometheus-stack     | 0         | helm-remote-plus-helm-local  | (Helm URL in AppSet) | [environments/](workloads/kube-prometheus-stack/applicationset/environment) (Prod / Staging), ([addon-chart-gateway/](workloads/kube-prometheus-stack/config/addon-chart-gateway) & [helm-values/](workloads/kube-prometheus-stack/config/helm-values)) | [link](workloads/kube-prometheus-stack/README.md)     |
+| metrics-server            | 0         | helm-remote                  | (Helm URL in AppSet)                                                                                  | n/a                                                                                                                                                                      | [link](workloads/kube-prometheus-stack/README.md)     |
+
+## Important concepts
+- IF YOU USE IT, LABEL IT (label application CRDs with the selectors used so it's easy to debug ... for filtering, searching, etc)
+- flat structure for easy debugging (clusters or workloads)
+- clusters opt-in to workloads
+- the config for workloads should be similar in structure
+  - kustomize have base / overlays
+  - helm has values files for env
+- do yourself a favor, document how to test local workloads in the folder (README.md).
+  - Include why's, hows, and whats
+  - Maybe include a bash one-liner to show what values are used (grep + bash on the cluster struct or appset)
+
+Best approach is creating a lower environment and playing "wide open"
+
 
 ## How to debug workloads
 

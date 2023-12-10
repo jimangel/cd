@@ -20,8 +20,8 @@ spec:
   template:
     metadata:
       # No need for a unique name, there should only be one per "area" of management
-      # argo can share same repo, but see itself
-      name: '01-self-managed-argo-{{ if eq .cluster.name "in-cluster" }}local{{ else }}{{ .cluster.friendlyName }}{{ end }}'
+      # MUST MATCH THE NAME SET IN THE CONFIG MAP (https://argo-cd.readthedocs.io/en/stable/faq/#why-is-my-app-out-of-sync-even-after-syncing)
+      name: '01-self-managed-argo-local'
       annotations:
         link.argocd.argoproj.io/external-link: http://test.com/test
       finalizers:
