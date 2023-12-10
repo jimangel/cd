@@ -10,13 +10,50 @@ TODO:
 - move `environments` config for appset into "config" directory and update kube-prometheus-stack
 - rename or append 01, 02 to high priority workloads / sync wave (like argoCD -> secrets -> istio -> gateway -> certs etc)
 
+### (optional) Pre-reqs 
+
+To use Gateway API, install the CRDs before Argo to allow for syncing HTTPRoutes / Gateway objects with no conflict
+
+```
+kubectl kustomize workloads/00-crds/config/base | kubectl apply -f -
+```
+
 ## Install / boostrap ArgoCD with Kustomize
 
+Install ArgoCD using kustomize (the preferred method) and then use an ArgoCD Application to wire-up the self-management.
+
+### Step 1:
+
+Install ArgoCD
+
 ```
-kubectl kustomize workloads/argocd/config/overlays/staging/ | kubectl apply -f -
+kubectl create ns argocd
+kubectl kustomize workloads/01-argocd/config/base/ | kubectl apply -f -
 ```
 
-Check pods are running: `kubectl get pods -n argocd`
+Wait for pods to be running: `kubectl get pods -n argocd`
+
+### Step 2:
+
+Add ApplicationSet to create apps and enable ArgoCD self-management
+
+```
+kubectl apply -f workloads/01-argocd/applicationset/argocd.yaml
+```
+
+From this point forward, adding ApplicationSets within the workloads/* directory are discovered by ArgoCD.
+
+## Accessing ArgoCD
+
+Logging in, Get admin password:
+
+```
+kubectl -n argocd get secrets argocd-initial-admin-secret \
+-o jsonpath='{.data.password}' | base64 -d
+
+kubectl port-forward svc/argocd-server -n argocd 8080:80
+```
+
 
 ## Create GitHub App for ArgoCD auth to GitHub
 
@@ -77,26 +114,6 @@ EOF
 
 Note: When using GitHub Apps, always use an HTTP URL for "repoURL" (to match here)
 
-## Add ApplicationSet to create apps and enable ArgoCD self-management
-
-```
-# Install self-managing bootstrap chart:
-kubectl apply -f workloads/argocd/applicationset/argocd.yaml
-```
-
-From this point forward, adding ApplicationSets within the workloads/* directory are discovered by argocd (after sync).
-
-## Accessing ArgoCD
-
-Logging in:
-
-```
-# Get admin password
-kubectl -n argocd get secrets argocd-initial-admin-secret \
--o jsonpath='{.data.password}' | base64 -d
-
-kubectl port-forward svc/argocd-server -n argocd 8080:80
-```
 
 ## Webhook config
 

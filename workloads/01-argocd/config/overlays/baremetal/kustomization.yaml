@@ -3,7 +3,7 @@ kind: Kustomization
 
 # add in staging resources
 resources:
-- ../staging
+- ../../base
 
 # adding in local service account for GKE connect, not needed if running on GKE
 patches:

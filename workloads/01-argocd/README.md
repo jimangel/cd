@@ -10,11 +10,7 @@ https://github.com/argoproj/argoproj-deployments/tree/master/argocd
 ## Run locally
 
 ```
-kubectl kustomize workloads/argocd/config/overlays/staging/ 
-
-# or
-
-kustomize build workloads/argocd/config/overlays/baremetal
+kubectl kustomize workloads/01-argocd/config/base
 ```
 
 

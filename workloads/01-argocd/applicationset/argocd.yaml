@@ -20,6 +20,7 @@ spec:
   template:
     metadata:
       # No need for a unique name, there should only be one per "area" of management
+      # MUST MATCH THE commonAnnotations (base kustomization.yaml) NAME!!!
       name: '01-self-managed-argo-local'
       annotations:
         link.argocd.argoproj.io/external-link: http://test.com/test
@@ -41,7 +42,7 @@ spec:
       # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
       - repoURL: https://github.com/jimangel/cd.git
         targetRevision: HEAD
-        path: workloads/argocd/config/overlays/{{ if eq .themes.provider "baremetal" }}baremetal{{ else }}{{ .themes.environment }}{{ end }}
+        path: workloads/01-argocd/config/overlays/{{ if eq .themes.provider "baremetal" }}baremetal{{ else }}{{ .themes.environment }}{{ end }}
       # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
       # !!!!! ALL OF THE OTHER APPLICATION SETS !!!!!
       # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!

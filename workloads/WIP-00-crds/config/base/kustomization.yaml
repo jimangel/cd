@@ -2,9 +2,9 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
 resources:
+# GATEWAY API
 - https://github.com/kubernetes-sigs/gateway-api//config/crd/experimental?ref=v1.0.0
 # or use normal:
 #- https://github.com/kubernetes-sigs/gateway-api//config/crd?ref=v0.8.0
-
-# TO CHECK VERSION:
-# curl -s "https://api.github.com/repos/kubernetes-sigs/gateway-api/tags" | jq -r '.[].name' | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | head -1
+# ARGO CD
+- https://github.com/argoproj/argo-cd//manifests/crds?ref=v2.9.3

@@ -22,7 +22,7 @@ spec:
       annotations:
         # PRIORITIZE CRD CHANGES BEFORE APPLICATION CHANGES
         argocd.argoproj.io/sync-wave: "-1"
-      name: 'gateway-api-crds-{{ if eq .cluster.name "in-cluster" }}local{{ else }}{{ .cluster.friendlyName }}{{ end }}'
+      name: '00-crds-{{ if eq .cluster.name "in-cluster" }}local{{ else }}{{ .cluster.friendlyName }}{{ end }}'
       labels:
         workloadType: networking
         environment: "{{ .themes.environment }}"
@@ -37,12 +37,8 @@ spec:
       sources:
       - repoURL: https://github.com/jimangel/cd.git
         targetRevision: HEAD
-        path: workloads/gateway-api-crds/config/overlays/{{ .themes.environment }}
+        path: workloads/00-crds/config/base
       destination:
         name: '{{ .cluster.name }}'
-        # no namespace, cluster wide CRDs...
-        # namespace: ''
       syncPolicy:
         automated: {}
-        syncOptions:
-          - CreateNamespace=true
