@@ -1,3 +1,5 @@
+I might abandon this effort, there should be a way to manage these better, for now, we can keep gateways with gateways and httproutes with apps.
+
 The central point of traffic ingress / egress
 
 ## Test
