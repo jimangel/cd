@@ -1,1 +1,3 @@
 .DS_Store
+# ignore the kustomize generated charts (tar files) from git
+workloads/*/config/*/charts
