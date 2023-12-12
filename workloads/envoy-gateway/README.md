@@ -1,12 +1,19 @@
+# envoy gateway
+
+> Note: You NEED >= 5.2.1 to support OCI repos (see: https://github.com/kubernetes-sigs/kustomize/pull/5167)
+
+```
+kustomize build --enable-helm workloads/envoy-gateway/config/base/
+
+# remove downloaded charts
+rm -rf workloads/envoy-gateway/config/base/charts
+
 helm template eg oci://docker.io/envoyproxy/gateway-helm --version v0.0.0-latest -n envoy-gateway-system --create-namespace
 
+helm template --repo oci://docker.io/envoyproxy/gateway-helm gateway-helm --version v0.0.0-latest
+```
 
 https://github.com/envoyproxy/gateway/tree/main/charts/gateway-helm
-
-
-envoy gateway api:
-
-
 
 https://gateway.envoyproxy.io/v0.6.0/user/quickstart/
 

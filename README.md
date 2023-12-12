@@ -2,6 +2,8 @@
 
 The setup is broken into a few different steps to prevent a self-managed ArgoCD from accidentally destroying the "core" foundation (mainly CRDs and namespace). Once setup, the entire setup is managed via changes in this repo.
 
+Note: This repo uses features that require >= ArgoCD 2.9 (set in the config) for [inline kustomize patching](https://github.com/argoproj/argo-cd/pull/14648) & [kustomize oci registry support](https://github.com/argoproj/argo-cd/pull/16082).
+
 ### (optional) Pre-reqs 
 
 Install any CRDs that you might use OUTSIDE of the ArgoCD automation. This prevents any accidental deletions or chicken/egg problems cleaning up essential resources.
@@ -231,6 +233,14 @@ TBD (one:one / one:many / take-what-you-need)
 
 https://argo-cd.readthedocs.io/en/stable/faq/#argo-cd-is-unable-to-connect-to-my-cluster-how-do-i-troubleshoot-it
 
+I ran into an issue where the etcd didn't match the state / status of ArgoCD. I ultimately had to remove finalizers from resources and reapply...
+
+```
+kubectl edit crd applications.argoproj.io
+
+# reapply arogcd
+```
+
 ## Blast radius
 
 Security branch settings / lint requirements:
@@ -239,6 +249,7 @@ Security branch settings / lint requirements:
 
 ## TODO
 
+- remove charts created folder via .gitignore
 - improve workload selection / declaration + helm values (https://github.com/argoproj/argo-cd/issues/11982 - allow selector + nested helm workload values )
 - create secrets rotation / creation tooling
 - update external secrets to use helm values (simplify setup): https://external-secrets.io/v0.7.0/api/secretstore/
