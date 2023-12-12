@@ -4,6 +4,7 @@ kind: Kustomization
 # add in staging resources
 resources:
 - ../../base
+- gke-gateway-secret.yaml
 
 # adding in local service account for GKE connect, not needed if running on GKE
 patches:

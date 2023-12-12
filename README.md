@@ -1,21 +1,17 @@
-## Install argo
-TODO:
+## Setup
 
-- improve workload selection / declaration + helm values (https://github.com/argoproj/argo-cd/issues/11982 - allow selector + nested helm workload values )
-- create secrets rotation / creation tooling
-- update external secrets to use helm values (simplify setup): https://external-secrets.io/v0.7.0/api/secretstore/
-- Document the service accounts used in GCP / dns a bit better (gcloud iam service-accounts create cloudydemo-dns01-solver + GCP GSM)
-- Move certmanager secret to git (`kubectl -n cert-manager create secret generic clouddns-dns01-solver-svc-acct --from-file=$HOME/key.json`)
-  - Add additional certmanager resources to workload (cluster issuer, wildcard requests, etc)
-- move `environments` config for appset into "config" directory and update kube-prometheus-stack
-- rename or append 01, 02 to high priority workloads / sync wave (like argoCD -> secrets -> istio -> gateway -> certs etc)
+The setup is broken into a few different steps to prevent a self-managed ArgoCD from accidentally destroying the "core" foundation (mainly CRDs and namespace). Once setup, the entire setup is managed via changes in this repo.
 
 ### (optional) Pre-reqs 
 
-To use Gateway API, install the CRDs before Argo to allow for syncing HTTPRoutes / Gateway objects with no conflict
+Install any CRDs that you might use OUTSIDE of the ArgoCD automation. This prevents any accidental deletions or chicken/egg problems cleaning up essential resources.
+
+The "critical" CRDs installed are:
+- ArgoCD CRDs (Application, ApplicationSet, etc)
+- Gateway API (Gateway, HTTPRoute, etc)
 
 ```
-kubectl kustomize workloads/00-crds/config/base | kubectl apply -f -
+kubectl kustomize workloads/WIP-00-crds/config/base | kubectl apply -f -
 ```
 
 ## Install / boostrap ArgoCD with Kustomize
@@ -27,6 +23,7 @@ Install ArgoCD using kustomize (the preferred method) and then use an ArgoCD App
 Install ArgoCD
 
 ```
+# create namespace outside of workload to prevent deletion on cleanup
 kubectl create ns argocd
 kubectl kustomize workloads/01-argocd/config/base/ | kubectl apply -f -
 ```
@@ -35,58 +32,23 @@ Wait for pods to be running: `kubectl get pods -n argocd`
 
 ### Step 2:
 
-Add ApplicationSet to create apps and enable ArgoCD self-management
+Create GitHub App for ArgoCD auth to GitHub
 
-```
-kubectl apply -f workloads/01-argocd/applicationset/argocd.yaml
-```
-
-From this point forward, adding ApplicationSets within the workloads/* directory are discovered by ArgoCD.
-
-## Accessing ArgoCD
-
-Logging in, Get admin password:
-
-```
-kubectl -n argocd get secrets argocd-initial-admin-secret \
--o jsonpath='{.data.password}' | base64 -d
-
-kubectl port-forward svc/argocd-server -n argocd 8080:80
-```
-
-
-## Create GitHub App for ArgoCD auth to GitHub
+At this point you have a cluster with Gateway API CRDs and ARGO CD installed. Next, setup GitHub app for interacting with GitHub.
 
 > https://docs.github.com/en/apps/creating-github-apps
+
+IMPORTANT: Grant the app "Commit statuses (read and write)" and "Contents (read only)"
+
+Install it on your repo:
+
+![Alt text](scripts/img/image-1.png)
+
+Configure Argo:
 
 ```
 # https://github.com/settings/apps
 
-# New GitHub App
-
-# Under "Homepage URL", type the full URL to your app's website. If you don’t have a dedicated URL and your app's code is stored in a public repository, you can use that repository URL. Or, you can use the URL of the organization or user that owns the app.
-
-# For Repo Permissions
-# Commit statuses (read / write) -> allows for updating CI status via GHA
-
-# disabled webhook for now and installed on my repos
-```
-
-NOTE: added "contents" in addition for permissions (THIS IS IMPORTANT!!):
-
-![Alt text](scripts/img/image-2.png)
-
-![Alt text](scripts/img/image-1.png)
-
-![Alt text](scripts/img/image.png)
-
-Security branch settings / lint requirements:
-
-![Alt text](scripts/img/image-3.png)
-
-## Setup git repo to use GitHub App credentials
-
-```
 export REPO_NAME="https://github.com/jimangel/cd.git"
 export GH_APP_ID=########
 # go to https://github.com/settings/installations and check the URL in "configure"
@@ -112,8 +74,28 @@ $(cat $PRIV_KEY_PATH  | sed 's/^/    /')
 EOF
 ```
 
-Note: When using GitHub Apps, always use an HTTP URL for "repoURL" (to match here)
+> Note: When using GitHub Apps, always use an HTTP URL for "repoURL" (to match here)
 
+### Step 3:
+
+Add ApplicationSet to create apps and enable ArgoCD self-management
+
+```
+kubectl apply -f workloads/01-argocd/applicationset/argocd.yaml
+```
+
+From this point forward, adding ApplicationSets within the workloads/* directory are discovered by ArgoCD.
+
+## Accessing ArgoCD
+
+Logging in, Get admin password:
+
+```
+kubectl -n argocd get secrets argocd-initial-admin-secret \
+-o jsonpath='{.data.password}' | base64 -d
+
+kubectl port-forward svc/argocd-server -n argocd 8080:80
+```
 
 ## Webhook config
 
@@ -230,14 +212,6 @@ Since the first install we "bootstrapped," adding new clusters is a matter of:
 - Add the connection information to a secret in ArgoCD
 - Sync!
 
-### Adding a cluster with argocd cli:
-
-```
-curl -sSL -o argocd-linux-amd64 https://github.com/argoproj/argo-cd/releases/latest/download/argocd-linux-amd64
-sudo install -m 555 argocd-linux-amd64 /usr/local/bin/argocd
-rm argocd-linux-amd64
-```
-
 ### Adding GKE Connect Clusters
 
 ```
@@ -249,29 +223,6 @@ gcloud iam service-accounts create argocd-fleet-admin --project $PROJECT_ID
 gcloud projects add-iam-policy-binding $PROJECT_ID --member "serviceAccount:argocd-fleet-admin@${PROJECT_ID}.iam.gserviceaccount.com" --role roles/gkehub.gatewayEditor
 ```
 
-## Login
-
-Get admin password and login:
-
-```
-# login to argocd
-argocd login --port-forward --port-forward-namespace=argocd --kube-context [ARGOCD_KUBE_CONTEXT]
-```
-
-Use argocd cli and kubeconfig context to add cluster(s)
-
-```
-# TODO: Connect gateway
-
-# update context via getting new credentials
-gcloud container clusters get-credentials CLUSTER_NAME --zone CLUSTER_ZONE --project PROJECT
-
-# https://argo-cd.readthedocs.io/en/stable/user-guide/commands/argocd_cluster_add/
-kubectl config get-contexts
-
-argocd --port-forward --port-forward-namespace=argocd --kube-context [ARGOCD_KUBE_CONTEXT] cluster add [TARGET_CLUSTER_CONTEXT]
-```
-
 ## Fork this approach
 
 TBD (one:one / one:many / take-what-you-need)
@@ -279,3 +230,20 @@ TBD (one:one / one:many / take-what-you-need)
 ## Trouble
 
 https://argo-cd.readthedocs.io/en/stable/faq/#argo-cd-is-unable-to-connect-to-my-cluster-how-do-i-troubleshoot-it
+
+## Blast radius
+
+Security branch settings / lint requirements:
+
+![Alt text](scripts/img/image-3.png)
+
+## TODO
+
+- improve workload selection / declaration + helm values (https://github.com/argoproj/argo-cd/issues/11982 - allow selector + nested helm workload values )
+- create secrets rotation / creation tooling
+- update external secrets to use helm values (simplify setup): https://external-secrets.io/v0.7.0/api/secretstore/
+- Document the service accounts used in GCP / dns a bit better (gcloud iam service-accounts create cloudydemo-dns01-solver + GCP GSM)
+- Move certmanager secret to git (`kubectl -n cert-manager create secret generic clouddns-dns01-solver-svc-acct --from-file=$HOME/key.json`)
+  - Add additional certmanager resources to workload (cluster issuer, wildcard requests, etc)
+- move `environments` config for appset into "config" directory and update kube-prometheus-stack
+- rename or append 01, 02 to high priority workloads / sync wave (like argoCD -> secrets -> istio -> gateway -> certs etc)

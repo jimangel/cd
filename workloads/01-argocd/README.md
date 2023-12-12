@@ -13,6 +13,9 @@ https://github.com/argoproj/argoproj-deployments/tree/master/argocd
 kubectl kustomize workloads/01-argocd/config/base
 ```
 
+## Note
+
+If using baremetal, argo fails to redeploy because of a missing secret. I could add this to the bootstrap but instead, I'll just create a placeholder.
 
 ## GKE connect setup
 

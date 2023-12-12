@@ -25,6 +25,7 @@ spec:
         syncType: "helm-remote"
         # for quick ref
         cluster: "{{ .cluster.friendlyName }}"
+      annotations:
         # PRIORITIZE GATEWAY/CRD CHANGES BEFORE APPLICATION CHANGES
         argocd.argoproj.io/sync-wave: "-1"
       finalizers:
