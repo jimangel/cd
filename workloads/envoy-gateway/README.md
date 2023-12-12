@@ -5,7 +5,7 @@
 ```
 kustomize build --enable-helm workloads/envoy-gateway/config/base/
 
-# remove downloaded charts
+# remove downloaded charts (also ignored by git)
 rm -rf workloads/envoy-gateway/config/base/charts
 
 helm template eg oci://docker.io/envoyproxy/gateway-helm --version v0.0.0-latest -n envoy-gateway-system --create-namespace
