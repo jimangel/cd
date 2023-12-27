@@ -30,3 +30,6 @@ workloads:
   kube-prometheus-stack: deployed
   argorollouts-canary-demo: deployed
   argorollouts: deployed
+config:
+  # your fork or use my public repo
+  repoURL: "https://github.com/jimangel/cd.git"

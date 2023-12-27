@@ -18,3 +18,7 @@ themes:
 workloads:
   certmanager: deployed
   gatekeeper: deployed
+# "pyramid base"
+config:
+  # your fork or use my public repo
+  repoURL: "https://github.com/jimangel/cd.git"
