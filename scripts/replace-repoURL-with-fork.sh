@@ -35,8 +35,6 @@ replace_repo_url() {
 echo "Performing a dry run (no changes will be applied):"
 find "$ROOT_DIR" -type f -exec grep -H 'repoURL: "https://github.com/jimangel/cd.git"' {} \; | sed 's|repoURL: "https://github.com/jimangel/cd.git"|repoURL: "'"$new_repo_url"'"|'
 
-
-
 # Confirmation before applying changes
 if [[ "$1" == "--no-dryrun" ]]; then
     echo "You are about to replace all instances of 'https://github.com/jimangel/cd.git' with '$new_repo_url'."
