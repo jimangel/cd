@@ -11,7 +11,7 @@ resources:
 # - github.com/argoproj/argo-cd//manifests/cluster-install?ref=v1.0.1
 # - https://raw.githubusercontent.com/argoproj/argo-cd/master/manifests/ha/install.yaml
 # - https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
-- https://raw.githubusercontent.com/argoproj/argo-cd/v2.9.3/manifests/install.yaml
+- https://raw.githubusercontent.com/argoproj/argo-cd/v2.10.0-rc1/manifests/install.yaml
 # add a RESTART YAML
 - restart-argocd.yaml
 
@@ -21,7 +21,7 @@ resources:
 
 images:
 - name: quay.io/argoproj/argocd
-  newTag: v2.9.3
+  newTag: v2.10.0-rc1
 
 components:
 - https://github.com/argoproj-labs/argocd-extensions/manifests
