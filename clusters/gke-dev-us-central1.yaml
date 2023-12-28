@@ -16,8 +16,8 @@ themes:
   provider: gke
 # workloads opt-in as inventory
 workloads:
-  certmanager: deployed
-  gatekeeper: deployed
+ #certmanager: deployed
+ # gatekeeper: deployed
 # "pyramid base"
 config:
   # your fork or use my public repo
