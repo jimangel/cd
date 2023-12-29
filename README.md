@@ -16,6 +16,14 @@ The "critical" CRDs installed are:
 kubectl kustomize workloads/WIP-00-crds/config/base | kubectl apply -f -
 ```
 
+## Workload Identity requirements
+
+TBD: PIC
+
+TBD: Table of what goes where
+
+TBD: section about GKE WI + BYO-WI
+
 ## Install / boostrap ArgoCD with Kustomize
 
 Install ArgoCD using kustomize (the preferred method) and then use an ArgoCD Application to wire-up the self-management.
@@ -33,6 +41,44 @@ kubectl kustomize workloads/01-argocd/config/base/ | kubectl apply -f -
 Wait for pods to be running: `kubectl get pods -n argocd`
 
 ### Step 2:
+
+Setup secret data
+
+[IMG]
+
+#### With workload identity on GKE
+
+TBD
+
+#### With a IAM service account secret on baremetal
+
+Create a "secret accessor" service account on GCP and bind it to the required secrets. First ensure `gcloud` is configured:
+
+```
+# gcloud config list
+export PROJECT_ID=myproject-name
+gcloud config set project $PROJECT_ID
+```
+
+Create the GCP Service Account:
+
+```
+gcloud iam service-accounts create cloudydemo-secret-admin --display-name "cloudydemo-secret-admin"
+```
+
+Access the service account to create the secret
+
+```
+gcloud iam service-accounts keys create ~/key-2.json --iam-account cloudydemo-secret-admin@$PROJECT_ID.iam.gserviceaccount.com
+```
+
+# create secret
+kubectl -n external-secrets create secret generic cloudydemo-secret-admin --from-file=secret-access-credentials=$HOME/key2.json
+
+
+### Step 3:
+
+
 
 Create GitHub App for ArgoCD auth to GitHub
 
@@ -78,7 +124,7 @@ EOF
 
 > Note: When using GitHub Apps, always use an HTTP URL for "repoURL" (to match here)
 
-### Step 3:
+### Step 4:
 
 Add ApplicationSet to create apps and enable ArgoCD self-management
 
