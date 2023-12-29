@@ -11,20 +11,6 @@ gcloud iam service-accounts create cloudydemo-dns01-solver --display-name "cloud
 gcloud projects add-iam-policy-binding $PROJECT_ID \
    --member serviceAccount:cloudydemo-dns01-solver@$PROJECT_ID.iam.gserviceaccount.com \
    --role roles/dns.admin
-
-# get service account file
-gcloud iam service-accounts keys create ~/key-gsm.json \
-   --iam-account cloudydemo-dns01-solver@$PROJECT_ID.iam.gserviceaccount.com
-
-# create gcp secret
-echo -ne '{"password":"itsasecret"}' | gcloud secrets create mysecret --data-file=-
-
-gcloud iam service-accounts create external-secrets
-
-# create secret
-kubectl -n cert-manager create secret generic clouddns-dns01-solver-svc-acct --from-file=$HOME/key.json
-
-
 ```
 
 ```
@@ -49,9 +35,9 @@ spec:
           # The ID of the GCP project
           project: $PROJECT_ID
           # This is the secret used to access the service account
-          serviceAccountSecretRef:
-            name: clouddns-dns01-solver-svc-acct
-            key: key.json
+          #serviceAccountSecretRef:
+          #  name: clouddns-dns01-solver-svc-acct
+          # key: key.json
 EOF
 ```
 
