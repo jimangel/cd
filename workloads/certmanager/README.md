@@ -81,3 +81,11 @@ spec:
   - "*.gpu-local.cloudydemo.com"
 EOF
 ```
+
+
+```
+helm template my-cert-manager cert-manager \
+    --repo https://charts.jetstack.io \
+    --version v1.13.1 \
+    -f workloads/certmanager/config/values-staging.yaml
+```

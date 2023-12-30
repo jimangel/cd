@@ -53,9 +53,3 @@ spec:
         automated: {}
         syncOptions:
           - CreateNamespace=true
-
-helmCharts:
-- name: gateway-helm
-  namespace: istio-system
-  version: v0.0.0-latest
-  repo: oci://docker.io/envoyproxy

@@ -23,7 +23,7 @@ workloads:
   gateway-north-south: deployed
   certmanager: deployed
   #oss-istio: deployed
-  #envoy-gateway: deployed
+  envoy-gateway: deployed
   metrics-server: deployed
   external-secrets-operator: deployed
   gatekeeper: deployed

@@ -1,3 +1,5 @@
+serviceAccount:
+  name: cert-manager
 volumeMounts:
   - name: token
     mountPath: "/var/run/service-account"
