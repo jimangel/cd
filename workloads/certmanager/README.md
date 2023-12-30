@@ -34,12 +34,10 @@ spec:
         cloudDNS:
           # The ID of the GCP project
           project: $PROJECT_ID
-          # This is the secret used to access the service account
-          #serviceAccountSecretRef:
-          #  name: clouddns-dns01-solver-svc-acct
-          # key: key.json
 EOF
 ```
+
+
 
 Validate status:
 
@@ -55,7 +53,7 @@ apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
   name: argocd-ui-cert-resource
-  namespace: istio-gateway
+  namespace: envoy-gateway-system
 spec:
   secretName: argocd-ui-cert
   issuerRef:
@@ -70,7 +68,7 @@ apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
   name: gateway-http-https-wildcard-cert
-  namespace: istio-gateway
+  namespace: envoy-gateway-system
 spec:
   secretName: gateway-http-https-wildcard-cert
   issuerRef:
@@ -86,6 +84,20 @@ EOF
 ```
 helm template my-cert-manager cert-manager \
     --repo https://charts.jetstack.io \
-    --version v1.13.1 \
+    --version v1.13.3 \
     -f workloads/certmanager/config/values-staging.yaml
 ```
+
+---
+
+Other:
+
+```
+          # This is the secret used to access the service account
+          #serviceAccountSecretRef:
+          #  name: clouddns-dns01-solver-svc-acct
+          # key: key.json
+```
+
+---
+

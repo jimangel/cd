@@ -7,8 +7,8 @@ kind: Kustomization
 
 helmCharts:
 - name: gateway-helm
-  namespace: istio-system
-  version: v0.0.0-latest
+  namespace: envoy-gateway-system
+  version: v0.6.0
   repo: oci://docker.io/envoyproxy
 #  valuesInline:
 #    defaultRevision: "default"

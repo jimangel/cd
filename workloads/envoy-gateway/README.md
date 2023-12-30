@@ -80,7 +80,7 @@ EOF
 
 
 ```
-cat <<EOF | kubectl apply -n default -f -
+cat <<EOF | kubectl apply -n envoy-gateway-system -f -
 apiVersion: gateway.networking.k8s.io/v1
 kind: Gateway
 metadata:
@@ -92,16 +92,16 @@ spec:
   - name: http
     port: 80
     protocol: HTTP
-    # hostname: "*.example.com"
+    hostname: "*.gpu-local.cloudydemo.com"
   - name: https
     port: 443
     protocol: HTTPS
-    # hostname: "*.example.com"
+    hostname: "*.gpu-local.cloudydemo.com"
     tls:
       mode: Terminate
       certificateRefs:
       - kind: Secret
-        name: example-com
+        name: gateway-http-https-wildcard-cert
 EOF
 
 
@@ -115,7 +115,6 @@ spec:
   gatewayClassName: eg
   listeners:
   - name: https
-    hostname: "*.gpu-local.cloudydemo.com"
     port: 443
     protocol: HTTPS
     tls:
@@ -128,7 +127,6 @@ spec:
   - name: http
     protocol: HTTP
     port: 80
-    hostname: "*.gpu-local.cloudydemo.com"
     allowedRoutes:
       namespaces:
         from: All

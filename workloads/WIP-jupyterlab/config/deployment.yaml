@@ -68,8 +68,8 @@ metadata:
   namespace: jupyter-notebook
 spec:
   parentRefs:
-  - name: cluster-north-south-gateway
-    namespace: istio-gateway
+  - name: eg
+    namespace: envoy-gateway-system
     port: 80
   hostnames:
     - jupyter.gpu-local.cloudydemo.com
@@ -87,8 +87,8 @@ metadata:
   namespace: jupyter-notebook
 spec:
   parentRefs:
-  - name: cluster-north-south-gateway
-    namespace: istio-gateway
+  - name: eg
+    namespace: envoy-gateway-system
     port: 443
   hostnames:
     - jupyter.gpu-local.cloudydemo.com
