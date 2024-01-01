@@ -80,31 +80,6 @@ EOF
 
 
 ```
-cat <<EOF | kubectl apply -n envoy-gateway-system -f -
-apiVersion: gateway.networking.k8s.io/v1
-kind: Gateway
-metadata:
-  name: eg
-  namespace: envoy-gateway-system
-spec:
-  gatewayClassName: eg
-  listeners:
-  - name: http
-    port: 80
-    protocol: HTTP
-    hostname: "*.gpu-local.cloudydemo.com"
-  - name: https
-    port: 443
-    protocol: HTTPS
-    hostname: "*.gpu-local.cloudydemo.com"
-    tls:
-      mode: Terminate
-      certificateRefs:
-      - kind: Secret
-        name: gateway-http-https-wildcard-cert
-EOF
-
-
 cat <<EOF | kubectl apply -f -
 apiVersion: gateway.networking.k8s.io/v1beta1
 kind: Gateway

@@ -37,15 +37,38 @@ spec:
         repoURL: https://charts.jetstack.io
         targetRevision: 'v1.13.3'
         helm:
-          parameters:
-          - name: "installCRDs"
-            value: "true"
-          valueFiles:
-            - $values/workloads/certmanager/config/values-{{ .themes.environment }}.yaml
+          valuesObject:
+            serviceAccount:
+              name: cert-manager
+            volumeMounts:
+              - name: token
+                mountPath: "/var/run/service-account"
+                readOnly: true
+              - name: workload-identity-credential-configuration
+                mountPath: "/etc/workload-identity"
+                readOnly: true
+            extraEnv:
+              - name: GOOGLE_APPLICATION_CREDENTIALS
+                value: "/etc/workload-identity/credential-configuration.json"
+            volumes:
+              - name: token
+                projected:
+                  sources:
+                  - serviceAccountToken:
+                      audience: "https://iam.googleapis.com/projects/463846382579/locations/global/workloadIdentityPools/custom-baremetal-pool/providers/argocd-cluster-provider"
+                      expirationSeconds: 3600
+                      path: token
+              - name: workload-identity-credential-configuration
+                configMap:
+                  name: certmanager-sa-wif
+          # Skip custom resource definition installation if chart contains custom resource definitions. Defaults to false
+          skipCrds: true
+          #valueFiles:
+          #  - $values/workloads/certmanager/config/values-{{ .themes.environment }}.yaml
       # If the path field is not set, Argo CD will use the repository solely as a source of value files.
-      - repoURL: "https://github.com/jimangel/cd.git"
-        targetRevision: HEAD
-        ref: values
+      #- repoURL: "https://github.com/jimangel/cd.git"
+      #  targetRevision: HEAD
+      #  ref: values
       destination:
         name: '{{ .cluster.name }}'
         namespace: 'cert-manager'
