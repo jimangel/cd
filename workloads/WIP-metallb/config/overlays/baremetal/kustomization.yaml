@@ -1,0 +1,5 @@
+# kustomization.yaml
+
+resources:
+- ../../base
+- metallb-config.yaml

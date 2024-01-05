@@ -7,4 +7,8 @@ resources:
 # or use normal:
 #- https://github.com/kubernetes-sigs/gateway-api//config/crd?ref=v0.8.0
 # ARGO CD
-- https://github.com/argoproj/argo-cd//manifests/crds?ref=v2.9.3
+- https://github.com/argoproj/argo-cd//manifests/crds?ref=v2.10.0-rc1
+# - https://github.com/argoproj/argo-cd//manifests/crds
+# CERT MANAGER
+#- https://github.com/cert-manager/cert-manager/releases/download/v1.13.3/cert-manager.crds.yaml
+- https://github.com/cert-manager/cert-manager/releases/download/v1.13.3/cert-manager.crds.yaml

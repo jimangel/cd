@@ -1,0 +1,56 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: metallb
+  namespace: argocd
+spec:
+  goTemplate: true
+  # we default the destination to be itself...
+  generators:
+    # really only using this to match my .releaseName...
+    # TODO: can this be combined with the helm values vs. 2 sources?
+  - git:
+      files:
+      - path: clusters/*.yaml
+      repoURL: "https://github.com/jimangel/cd.git"
+      revision: HEAD
+    selector:
+      matchLabels:
+        workloads.metallb: "deployed"
+  template:
+    metadata:
+      name: 'metallb-{{ if eq .cluster.name "in-cluster" }}local{{ else }}{{ .cluster.friendlyName }}{{ end }}'
+      finalizers:
+      - "resources-finalizer.argocd.argoproj.io"
+      labels:
+        workloadType: networking
+        environment: "{{ .themes.environment }}"
+        # how is this workload deployed in argocd?
+        syncType: "kustomize-remote"
+        # for quick ref
+        cluster: "{{ .cluster.friendlyName }}"
+    spec:
+      project: default
+      sources:
+      # using a kustomized helm chart to include env var for gateway api
+      - repoURL: https://github.com/jimangel/cd.git
+        targetRevision: HEAD
+        path: workloads/metallb/config/base
+        #kustomize:
+          #patches:
+          #- target:
+          #    kind: Deployment
+          #    name: metallbd
+          #  patch: |
+          #    - op: add
+          #      path: "/spec/template/spec/containers/0/env/-"
+          #      value:
+          #        name: PILOT_ENABLE_ALPHA_GATEWAY_API
+          #        value: "true"
+      destination:
+        name: '{{ .cluster.name }}'
+        namespace: 'metallb-system'
+      syncPolicy:
+        automated: {}
+        syncOptions:
+          - CreateNamespace=true

@@ -28,6 +28,17 @@ TBD: section about GKE WI + BYO-WI
 
 Install ArgoCD using kustomize (the preferred method) and then use an ArgoCD Application to wire-up the self-management.
 
+### Step 0:
+
+Install CRDs:
+
+This is required to install the ArgoCD CRDs, I also added in Gateway API CRDs and Cert Manager. 
+
+```
+# installs the following CRDs: `kubectl kustomize workloads/WIP-00-crds/config/base | grep '^  name: '`
+kubectl apply -k workloads/WIP-00-crds/config/base
+```
+
 ### Step 1:
 
 Install ArgoCD

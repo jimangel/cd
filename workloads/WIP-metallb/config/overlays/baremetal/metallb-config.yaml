@@ -1,0 +1,32 @@
+apiVersion: metallb.io/v1beta1
+kind: IPAddressPool
+metadata:
+  name: first-pool
+  namespace: metallb-system
+spec:
+  addresses:
+  - 192.168.222.0/24
+  # Some old consumer network equipment mistakenly blocks IP addresses ending in .0 and .255, because of misguided "smurf protection."
+  avoidBuggyIPs: true
+---
+apiVersion: metallb.io/v1beta1
+kind: BGPAdvertisement
+metadata:
+  name: local
+  namespace: metallb-system
+spec:
+  ipAddressPools:
+  - first-pool
+---
+apiVersion: metallb.io/v1beta2
+kind: BGPPeer
+metadata:
+  name: local
+  namespace: metallb-system
+spec:
+  myASN: 65002
+  peerASN: 65001
+  peerAddress: 192.168.7.127
+  sourceAddress: 192.168.7.51
+  # only needed because I have my BGP peer on another subnet and it hops a gateway.
+  #ebgpMultiHop: true
