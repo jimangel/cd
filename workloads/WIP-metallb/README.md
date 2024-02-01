@@ -10,7 +10,7 @@ kubectl -n metallb-system kustomize workloads/WIP-metallb/config/overlays/bareme
 ## Debug
 
 ```
-
+kubectl logs -f -l component=speaker -n metallb-system
 ```
 
 ## Delete (manual)
