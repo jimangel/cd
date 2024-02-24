@@ -8,7 +8,7 @@ metadata:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: jupyter-deployment
+  name: jupyter-deployment-2
   namespace: jupyter-notebook
 spec:
   replicas: 1
@@ -20,9 +20,15 @@ spec:
       labels:
         app: jupyter-notebook
     spec:
+      runtimeClassName: nvidia
       containers:
-      - name: jupyter-container
-        image: jupyter/scipy-notebook:python-3.10.10
+      - name: jupyter-container-2
+        #image: jupyter/scipy-notebook:python-3.10.10
+        # cschranz/gpu-jupyter:v1.6_cuda-12.0_ubuntu-22.04
+        # cschranz/gpu-jupyter:v1.5_cuda-11.8_ubuntu-22.04_python-only
+        # cschranz/gpu-jupyter:v1.6_cuda-11.8_ubuntu-22.04
+        # cschranz/gpu-jupyter:v1.6_cuda-12.0_ubuntu-22.04
+        image: cschranz/gpu-jupyter:v1.6_cuda-12.0_ubuntu-22.04
         ports:
         - containerPort: 8888
         env:
@@ -41,12 +47,24 @@ spec:
         volumeMounts:
         - name: workdir
           mountPath: /home/jovyan/work
+        - name: nfs-volume  # Mount the NFS volume here
+          mountPath: /home/jovyan/work/nfs
         #  readOnly: true
+        resources:
+          limits:
+            nvidia.com/gpu: 2
+      nodeSelector:
+        kubernetes.io/hostname: node2
       volumes:
       - name: workdir
         hostPath:
           path: /home/jangel/work # Adjust to your path
           type: DirectoryOrCreate
+      - name: nfs-volume  # Define the NFS volume
+        nfs:
+          server: 172.16.4.100
+          path: "/aiml"
+          readOnly: false
 ---
 apiVersion: v1
 kind: Service
