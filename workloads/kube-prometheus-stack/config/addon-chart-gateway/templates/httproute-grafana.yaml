@@ -5,10 +5,8 @@ metadata:
   namespace: monitoring
 spec:
   parentRefs:
-  - group: gateway.networking.k8s.io	
-    kind: Gateway
-    name: cluster-north-south-gateway
-    namespace: istio-gateway
+  - name: eg
+    namespace: envoy-gateway-system
     port: 80
   hostnames:
     - {{ .Values.grafana.url }}
@@ -30,10 +28,8 @@ metadata:
   namespace: monitoring
 spec:
   parentRefs:
-  - group: gateway.networking.k8s.io	
-    kind: Gateway
-    name: cluster-north-south-gateway
-    namespace: istio-gateway
+  - name: eg
+    namespace: envoy-gateway-system
     port: 443
   hostnames:
     - {{ .Values.grafana.url }}
