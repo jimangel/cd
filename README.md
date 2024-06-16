@@ -1,59 +1,123 @@
 ## Setup
 
-The setup is broken into a few different steps to prevent a self-managed ArgoCD from accidentally destroying the "core" foundation (mainly CRDs and namespace). Once setup, the entire setup is managed via changes in this repo.
+High level summary: This setup assumes you're creating the "host" of ArgoCD self-managed and walks through the bootstrap setup. Once completed, adding clusters and managing clusters should be only done via git operations.
+
+The setup is broken into a few different steps to prevent a self-managed ArgoCD from accidentally destroying the "core" foundation (mainly CRDs and namespace). Once setup, the entire setup is managed via changes in this repo (or yours).
 
 Note: This repo uses features that require >= ArgoCD 2.9 (set in the config) for [inline kustomize patching](https://github.com/argoproj/argo-cd/pull/14648) & [kustomize oci registry support](https://github.com/argoproj/argo-cd/pull/16082).
 
-### (optional) Pre-reqs 
+## Big Assumptions
 
-Install any CRDs that you might use OUTSIDE of the ArgoCD automation. This prevents any accidental deletions or chicken/egg problems cleaning up essential resources.
+- Secret data lives in GCP (Secret Manager)
+- All clusters can talk to the GCP via Workload Identity (TODO: instructions)
+- A GitHub application is used to represent the connection between ArgoCD and GitHub (scanning repos, leaving comments, etc.)
 
-The "critical" CRDs installed are:
-- ArgoCD CRDs (Application, ApplicationSet, etc)
-- Gateway API (Gateway, HTTPRoute, etc)
+By doing so, future bootstrapping is simplified and, for the most part, cloud agnostic.
 
-```
-kubectl kustomize workloads/WIP-00-crds/config/base | kubectl apply -f -
-```
-
-## Workload Identity requirements
-
-TBD: PIC
-
-TBD: Table of what goes where
-
-TBD: section about GKE WI + BYO-WI
+GCP Secret Manager can be substituted for any other secret manager, but each new provider requires an answer to IAM, security, and access. Another consideration is how to get "secret zero" into this setup, which is easily solved with `gcloud`.
 
 ## Install / boostrap ArgoCD with Kustomize
 
 Install ArgoCD using kustomize (the preferred method) and then use an ArgoCD Application to wire-up the self-management.
 
-### Step 0:
+### Step 1: Install the CRDs on the primary ArgoCD cluster
 
-Install CRDs:
+Install any CRDs that you might use OUTSIDE of the ArgoCD automation. This prevents any accidental deletions or chicken/egg problems cleaning up essential resources.
 
-This is required to install the ArgoCD CRDs, I also added in Gateway API CRDs and Cert Manager. 
+View exactly what will be installed with:
 
 ```
-# installs the following CRDs: `kubectl kustomize workloads/WIP-00-crds/config/base | grep '^  name: '`
+# gets the names of each CRD yaml generated
+kubectl kustomize workloads/WIP-00-crds/config/base | grep '^  name: '
+```
+
+Or review [workloads/WIP-00-crds/config/base](workloads/WIP-00-crds/config/base)
+
+Actually install the CRDs
+
+> IMPORTANT: Don't forget to upgrade the CRDs as the applications that use them are updated.
+
+```
 kubectl apply -k workloads/WIP-00-crds/config/base
 ```
 
-### Step 1:
+Output similar to:
 
-Install ArgoCD
+```bash
+customresourcedefinition.apiextensions.k8s.io/applications.argoproj.io created
+customresourcedefinition.apiextensions.k8s.io/applicationsets.argoproj.io created
+customresourcedefinition.apiextensions.k8s.io/appprojects.argoproj.io created
+customresourcedefinition.apiextensions.k8s.io/certificaterequests.cert-manager.io created
+customresourcedefinition.apiextensions.k8s.io/certificates.cert-manager.io created
+customresourcedefinition.apiextensions.k8s.io/challenges.acme.cert-manager.io created
+customresourcedefinition.apiextensions.k8s.io/clusterissuers.cert-manager.io created
+customresourcedefinition.apiextensions.k8s.io/gatewayclasses.gateway.networking.k8s.io created
+customresourcedefinition.apiextensions.k8s.io/gateways.gateway.networking.k8s.io created
+customresourcedefinition.apiextensions.k8s.io/grpcroutes.gateway.networking.k8s.io created
+customresourcedefinition.apiextensions.k8s.io/httproutes.gateway.networking.k8s.io created
+customresourcedefinition.apiextensions.k8s.io/issuers.cert-manager.io created
+customresourcedefinition.apiextensions.k8s.io/orders.acme.cert-manager.io created
+customresourcedefinition.apiextensions.k8s.io/referencegrants.gateway.networking.k8s.io created
+customresourcedefinition.apiextensions.k8s.io/tcproutes.gateway.networking.k8s.io created
+customresourcedefinition.apiextensions.k8s.io/tlsroutes.gateway.networking.k8s.io created
+customresourcedefinition.apiextensions.k8s.io/udproutes.gateway.networking.k8s.io created`
+```
+
+### Step 2: Install ArgoCD
+
+Again, a little out-of-band to prevent any errors / issues.
 
 ```
 # create namespace outside of workload to prevent deletion on cleanup
 kubectl create ns argocd
+
+# dry-run: kubectl kustomize workloads/01-argocd/config/base/
 kubectl kustomize workloads/01-argocd/config/base/ | kubectl apply -f -
 ```
 
-Wait for pods to be running: `kubectl get pods -n argocd`
+Wait for pods to be running: `while true; do kubectl get pods -n argocd; sleep 5; done`
 
-### Step 2:
+Expected output:
 
-Setup secret data
+```
+NAME                                                READY   STATUS      RESTARTS   AGE
+argocd-application-controller-0                     1/1     Running     0          105s
+argocd-applicationset-controller-68575b9586-h9pdl   1/1     Running     0          98s
+argocd-bouncer-gglvp                                0/1     Completed   0          105s
+argocd-dex-server-5f7559bf46-rb9nv                  1/1     Running     0          98s
+argocd-notifications-controller-56b9589db6-442zl    1/1     Running     0          90s
+argocd-redis-566dfdccd6-k9qgb                       1/1     Running     0          98s
+argocd-repo-server-7c5bc489dc-zvm5g                 1/1     Running     0          98s
+argocd-server-f8f577d6d-fk46g                       2/2     Running     0          98s
+```
+
+Getting the `admin` password and logging in:
+
+```
+kubectl -n argocd get secrets argocd-initial-admin-secret \
+-o jsonpath='{.data.password}' | base64 -d
+
+kubectl port-forward svc/argocd-server -n argocd 8080:80
+
+# LOGIN
+# User: admin
+# Password: (From above get secret)
+```
+
+
+### Step 3: Configure ArgoCD to be self-managed and install `in-cluster` apps
+
+Add the ApplicationSets to create apps and reinstall ArgoCD to be self-management.
+
+> IMPORTANT NOTE: This will install any applications that are represented by "in-cluster" (in our case: https://github.com/jimangel/cd/blob/main/clusters/argocd-us-tx-local-gpu-box.yaml). To be specific, this install anything under "workloads:" + "deployed".
+
+```
+kubectl apply -f workloads/01-argocd/applicationset/argocd.yaml
+```
+
+From this point forward, adding ApplicationSets within the workloads/* directory are discovered by ArgoCD and all changes should be done via git.
+
+### Step 4: Setup secret data
 
 [IMG]
 
@@ -87,11 +151,7 @@ gcloud iam service-accounts keys create ~/key-2.json --iam-account cloudydemo-se
 kubectl -n external-secrets create secret generic cloudydemo-secret-admin --from-file=secret-access-credentials=$HOME/key2.json
 
 
-### Step 3:
-
-
-
-Create GitHub App for ArgoCD auth to GitHub
+### Step ??: Create GitHub App for ArgoCD auth to GitHub
 
 At this point you have a cluster with Gateway API CRDs and ARGO CD installed. Next, setup GitHub app for interacting with GitHub.
 
@@ -135,26 +195,6 @@ EOF
 
 > Note: When using GitHub Apps, always use an HTTP URL for "repoURL" (to match here)
 
-### Step 4:
-
-Add ApplicationSet to create apps and enable ArgoCD self-management
-
-```
-kubectl apply -f workloads/01-argocd/applicationset/argocd.yaml
-```
-
-From this point forward, adding ApplicationSets within the workloads/* directory are discovered by ArgoCD.
-
-## Accessing ArgoCD
-
-Logging in, Get admin password:
-
-```
-kubectl -n argocd get secrets argocd-initial-admin-secret \
--o jsonpath='{.data.password}' | base64 -d
-
-kubectl port-forward svc/argocd-server -n argocd 8080:80
-```
 
 ## Webhook config
 
@@ -259,8 +299,8 @@ Maybe create 2 flow charts (creating workloads, debugging workloads)
 - important to keep it as simple as possible
   - unique cluster env in dir/yaml
   - shared cluster(s) env in workloads/*/config
-  - unique application configuration in workloads/*/applicationset
-  - by design, applicationsets should be horizontally scaleable (adding new clusters can opt-in and inherit accordingly)
+  - unique application configuration in workloads/*/ApplicationSets
+  - by design, ApplicationSets should be horizontally scalable (adding new clusters can opt-in and inherit accordingly)
 - pay attention to resource management (prune vs. not + appset vs app pruning + secrets)
 - Include a bit about ignoreDifferences and when it comes into play.
 

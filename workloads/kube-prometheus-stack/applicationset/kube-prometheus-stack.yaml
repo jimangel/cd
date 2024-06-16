@@ -82,9 +82,10 @@ spec:
         path: workloads/kube-prometheus-stack/config/addon-chart-gateway
       destination:
         name: '{{ .cluster.name }}'
-        namespace: 'monitoring'
+        namespace: monitoring
       syncPolicy:
         automated: {}
         syncOptions:
           - CreateNamespace=true
           - ServerSideApply=true
+          - PruneLast=true

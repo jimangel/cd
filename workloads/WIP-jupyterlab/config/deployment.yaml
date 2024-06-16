@@ -52,7 +52,7 @@ spec:
         #  readOnly: true
         resources:
           limits:
-            nvidia.com/gpu: 2
+            nvidia.com/gpu: 1
       nodeSelector:
         kubernetes.io/hostname: node2
       volumes:
