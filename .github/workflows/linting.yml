@@ -4,7 +4,7 @@ on:
   pull_request:
     paths:
       - 'clusters/**.yaml'
-      - 'scripts/lint_yaml.py'
+      - 'scripts/lint_cluster_yaml.py'
       - 'Makefile'
 
 jobs:
