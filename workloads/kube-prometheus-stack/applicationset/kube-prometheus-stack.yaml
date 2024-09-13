@@ -56,30 +56,30 @@ spec:
         targetRevision: '{{ .targetRevisionGit }}'
         ref: values
       # get the Gateway API ingress resources from a local-helm config
-      - repoURL: "https://github.com/jimangel/cd.git"
-        targetRevision: '{{ .targetRevisionGit }}'
-        helm:
-          parameters:
-          - name: prometheus.URL
-            value: "prometheus.{{ .cluster.subdomain }}.{{ .cluster.domain }}"
-          # doing some funky stuff (slice by 4 chars) with helm values to match the generated template / app name
-          values: |
-            prometheus:
-              url: "prometheus.{{ .cluster.subdomain }}.{{ .cluster.domain }}"
-              service:
-                name: "kube-prometheus-stack-{{ if eq .cluster.name "in-cluster" }}loca{{ else }}{{ slice .cluster.friendlyName 0 4 }}{{ end }}-prometheus"
-                port: "9090"
-            grafana:
-              url: "grafana.{{ .cluster.subdomain }}.{{ .cluster.domain }}"
-              service:
-                name: "kube-prometheus-stack-{{ if eq .cluster.name "in-cluster" }}local{{ else }}{{ .cluster.friendlyName }}{{ end }}-grafana"
-                port: "80"
-            alertmanager:
-              url: "alertmanager.{{ .cluster.subdomain }}.{{ .cluster.domain }}"
-              service:
-                name: "kube-prometheus-stack-{{ if eq .cluster.name "in-cluster" }}loca{{ else }}{{ slice .cluster.friendlyName 0 4 }}{{ end }}-alertmanager"
-                port: "9093"
-        path: workloads/kube-prometheus-stack/config/addon-chart-gateway
+     # - repoURL: "https://github.com/jimangel/cd.git"
+     #   targetRevision: '{{ .targetRevisionGit }}'
+     #   helm:
+     #     parameters:
+     #     - name: prometheus.URL
+     #       value: "prometheus.{{ .cluster.subdomain }}.{{ .cluster.domain }}"
+     #     # doing some funky stuff (slice by 4 chars) with helm values to match the generated template / app name
+     #     values: |
+     #       prometheus:
+     #         url: "prometheus.{{ .cluster.subdomain }}.{{ .cluster.domain }}"
+     #         service:
+     #           name: "kube-prometheus-stack-{{ if eq .cluster.name "in-cluster" }}loca{{ else }}{{ slice .cluster.friendlyName 0 4 }}{{ end }}-prometheus"
+     #           port: "9090"
+     #       grafana:
+     #         url: "grafana.{{ .cluster.subdomain }}.{{ .cluster.domain }}"
+     #         service:
+     #           name: "kube-prometheus-stack-{{ if eq .cluster.name "in-cluster" }}local{{ else }}{{ .cluster.friendlyName }}{{ end }}-grafana"
+     #           port: "80"
+     #       alertmanager:
+     #         url: "alertmanager.{{ .cluster.subdomain }}.{{ .cluster.domain }}"
+     #         service:
+     #           name: "kube-prometheus-stack-{{ if eq .cluster.name "in-cluster" }}loca{{ else }}{{ slice .cluster.friendlyName 0 4 }}{{ end }}-alertmanager"
+     #           port: "9093"
+     #   path: workloads/kube-prometheus-stack/config/addon-chart-gateway
       destination:
         name: '{{ .cluster.name }}'
         namespace: monitoring
