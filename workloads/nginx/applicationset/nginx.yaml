@@ -29,7 +29,7 @@ spec:
     spec:
       project: default
       sources:
-      - chart: nginx
+      - chart: ingress-nginx
         repoURL: https://kubernetes.github.io/ingress-nginx
         targetRevision: '4.11.2'
         helm:
@@ -38,7 +38,14 @@ spec:
             controller:
               kind: DaemonSet
               service:
+                type: NodePort
                 externalTrafficPolicy: Local
+                nodePorts:
+                  http: 80
+                  https: 443
+              containerPort:
+                http: 80
+                https: 443
       destination:
         name: '{{ .cluster.name }}'
         # no namespace, cluster wide CRDs...

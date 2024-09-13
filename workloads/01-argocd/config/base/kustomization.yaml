@@ -8,23 +8,13 @@ commonAnnotations:
   app.kubernetes.io/instance: 01-self-managed-argo-local
 
 resources:
-# - github.com/argoproj/argo-cd//manifests/cluster-install?ref=v1.0.1
-# - https://raw.githubusercontent.com/argoproj/argo-cd/master/manifests/ha/install.yaml
-# - https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
-- https://raw.githubusercontent.com/argoproj/argo-cd/v2.11.3/manifests/install.yaml
+- github.com/argoproj/argo-cd/manifests/cluster-install?ref=v2.12.3
 # add a RESTART YAML
 - restart-argocd.yaml
 
-##########################################
-## SET RELEASE ABOVE AND BELOW FOR TESTING
-##########################################
-
-images:
-- name: quay.io/argoproj/argocd
-  newTag: v2.11.3
-
-components:
-- https://github.com/argoproj-labs/argocd-extensions/manifests
+#components:
+# extensions controller component
+#- https://github.com/argoproj-labs/argocd-extensions/manifests
 
 patches:
 - path: https://raw.githubusercontent.com/argoproj/argo-cd/master/notifications_catalog/install.yaml
