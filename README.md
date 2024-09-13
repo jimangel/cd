@@ -11,6 +11,7 @@ Note: This repo uses features that require >= ArgoCD 2.9 (set in the config) for
 - Secret data lives in GCP (Secret Manager)
 - All clusters can talk to the GCP via Workload Identity (TODO: instructions)
 - A GitHub application is used to represent the connection between ArgoCD and GitHub (scanning repos, leaving comments, etc.)
+- https://kubernetes.io/docs/tasks/tools/#kubectl installed
 
 By doing so, future bootstrapping is simplified and, for the most part, cloud agnostic.
 
@@ -71,7 +72,8 @@ Again, a little out-of-band to prevent any errors / issues.
 # create namespace outside of workload to prevent deletion on cleanup
 kubectl create ns argocd
 
-# dry-run: kubectl kustomize workloads/01-argocd/config/base/
+# install argoCD, manually, the first time
+# dry-run with `kubectl kustomize workloads/01-argocd/config/base/`
 kubectl kustomize workloads/01-argocd/config/base/ | kubectl apply -f -
 ```
 
@@ -105,7 +107,7 @@ kubectl port-forward svc/argocd-server -n argocd 8080:80
 ```
 
 
-### Step 3: Configure ArgoCD to be self-managed and install `in-cluster` apps
+### Step 3: Configure ArgoCD to be self-managed which installs all `in-cluster` apps
 
 Add the ApplicationSets to create apps and reinstall ArgoCD to be self-management.
 
@@ -117,39 +119,36 @@ kubectl apply -f workloads/01-argocd/applicationset/argocd.yaml
 
 From this point forward, adding ApplicationSets within the workloads/* directory are discovered by ArgoCD and all changes should be done via git.
 
+### AT END / OPTIONAL Step 2: (recommended) Configure the cluster's workload identity
+
+WHY? for certs / dns
+
+- If not on GCP, you can BYO-workload-id via: https://www.jimangel.io/posts/gcp-workload-id-baremetal-kubernetes/
+- NOTEBOOK: -gcloud + checks + create permissions plus yaml...
+- If on GCP, follow the docs: https://cloud.google.com/kubernetes-engine/docs/how-to/workload-identity
+
+I'm using a metal host, so I'll do the bare metal setup.
+
+> NOTE: This topic can get complex, but there are no requirements for which GCP project this belongs in. We're creating a pool of identities and the subsequent BINDINGS we create are what is important.
+
+We're essentially saying, "I trust this Kubernetes API server to mint tokens (service accounts) that we (cluster operators) can bind GCP IAM permissions to." Such as individual bindings to Google secrets.
+
+
+### (recommended) Understand your plan for automating certificates
+
+DO WE MANUALLY CREATE THE LB WILDCARD CERTS? If so, cert manager is not a requirement...
+
+How can we manage certificates?
+
+Our main goal is to allow the cluster that hosts argoCD the ability to read GCP secrets, access GCP resources, and/or **optionally** deploy apps to other GCP clusters using GCP GKE Connect.
+
+The first use is for cert-manager and uses Google DNS for certificate creation.
+
+> ONLY FIX CERT MANAGER / ATTRIBUTES? // ONLY FIX ARGOCD reaching? // whats the main use case here? 
+
 ### Step 4: Setup secret data
 
 [IMG]
-
-#### With workload identity on GKE
-
-TBD
-
-#### With a IAM service account secret on baremetal
-
-Create a "secret accessor" service account on GCP and bind it to the required secrets. First ensure `gcloud` is configured:
-
-```
-# gcloud config list
-export PROJECT_ID=myproject-name
-gcloud config set project $PROJECT_ID
-```
-
-Create the GCP Service Account:
-
-```
-gcloud iam service-accounts create cloudydemo-secret-admin --display-name "cloudydemo-secret-admin"
-```
-
-Access the service account to create the secret
-
-```
-gcloud iam service-accounts keys create ~/key-2.json --iam-account cloudydemo-secret-admin@$PROJECT_ID.iam.gserviceaccount.com
-```
-
-# create secret
-kubectl -n external-secrets create secret generic cloudydemo-secret-admin --from-file=secret-access-credentials=$HOME/key2.json
-
 
 ### Step ??: Create GitHub App for ArgoCD auth to GitHub
 
