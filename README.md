@@ -274,6 +274,11 @@ curl -s -o /dev/null -w "%{http_code}" -H 'X-GitHub-Event: ping' -d '{}' ${GITHU
 
 Best approach is creating a lower environment and playing "wide open"
 
+## Rules
+- All workloads include `README.md` with dry-run example
+- Group like applications and objects in single workloads
+- AppSet required, config preferred, environment subsets only if required
+- each workload has a defined "sync type" for future reference
 
 ## How to debug workloads
 

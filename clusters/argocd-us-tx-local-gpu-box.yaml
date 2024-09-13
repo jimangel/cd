@@ -4,8 +4,9 @@ cluster:
   # for applicationset names generally
   friendlyName: "gpu-box"
   # use https://kubernetes.default.svc for local argo
-  server: https://192.168.7.51:6443
-  domain: cloudydemo.com
+  server: https://192.168.7.74:6443
+  domain: nip.io
+  a-record: 192.168.7.74
   # could be used for common ingress settings per cluster domain
   subdomain: gpu-local
 # themes for common and shared values
