@@ -8,7 +8,7 @@ commonAnnotations:
   app.kubernetes.io/instance: 01-self-managed-argo-local
 
 resources:
-- github.com/argoproj/argo-cd/manifests/cluster-install?ref=v2.13.0-rc1
+- github.com/argoproj/argo-cd/manifests/cluster-install?ref=v2.12.0
 # add a RESTART YAML
 - restart-argocd.yaml
 - argocd-ingress.yaml
@@ -18,8 +18,8 @@ resources:
 #- https://github.com/argoproj-labs/argocd-extensions/manifests
 
 patches:
-- path: https://raw.githubusercontent.com/argoproj/argo-cd/master/notifications_catalog/install.yaml
-- path: argocd-notifications.yaml
+#- path: https://raw.githubusercontent.com/argoproj/argo-cd/master/notifications_catalog/install.yaml
+#- path: argocd-notifications.yaml
 - path: argocd-cmd-params-cm.yaml
 # https://argo-cd.readthedocs.io/en/stable/user-guide/kustomize/
 - path: argocd-cm.yaml

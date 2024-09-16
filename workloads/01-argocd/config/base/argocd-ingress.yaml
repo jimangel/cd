@@ -18,4 +18,4 @@ spec:
             name: argocd-server
             port:
               name: http
-    host: REPLACED.IN.APPLICATION.SET
+    host: replaced.in.appset.definition

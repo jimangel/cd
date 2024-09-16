@@ -39,6 +39,11 @@ Actually install the CRDs
 > IMPORTANT: Don't forget to upgrade the CRDs as the applications that use them are updated.
 
 ```
+# versioned argocd crds - move to script to update pre-installed versions
+kubectl apply -k "https://github.com/argoproj/argo-cd/manifests/crds?ref=v2.13.0-rc1"
+```
+
+```
 kubectl apply -k workloads/WIP-00-crds/config/base
 ```
 
@@ -290,6 +295,16 @@ kubectl -n argocd logs -f -l app.kubernetes.io/name=argocd-applicationset-contro
 
 # helpful to get the most recent status of events (maybe template issue.)
 kubectl get appset self-managed-argocd -n argocd -o yaml
+```
+
+>  Detected changes to resource applications.argoproj.io which is currently being deleted.
+
+From https://stackoverflow.com/questions/71164538/argocd-application-resource-stuck-at-deletion
+
+```
+# kubectl patch crd applications.argoproj.io -p '{"metadata": {"finalizers": null}}' --type merge
+kubectl delete -k "https://github.com/argoproj/argo-cd/manifests/crds?ref=v2.13.0-rc1"
+kubectl apply -k "https://github.com/argoproj/argo-cd/manifests/crds?ref=v2.13.0-rc1"
 ```
 
 ## Adding additional workloads (flowchart)
