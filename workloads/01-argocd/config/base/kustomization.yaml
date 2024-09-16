@@ -8,7 +8,7 @@ commonAnnotations:
   app.kubernetes.io/instance: 01-self-managed-argo-local
 
 resources:
-- github.com/argoproj/argo-cd/manifests/cluster-install?ref=v2.12.3
+- github.com/argoproj/argo-cd/manifests/cluster-install?ref=v2.13.0-rc1
 # add a RESTART YAML
 - restart-argocd.yaml
 - argocd-ingress.yaml
