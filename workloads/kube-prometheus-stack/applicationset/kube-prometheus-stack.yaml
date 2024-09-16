@@ -50,36 +50,43 @@ spec:
               enabled: false
             kubeEtcd:
               enabled: false
+            prometheus:
+              ingress:
+                enabled: true
+                ingressClassName: "nginx"
+                hosts:
+                  - prom.{{ if eq .cluster.domain "nip.io" }}{{ index .cluster "a-record" }}{{ else }}{{ .cluster.subdomain }}{{ end }}.{{ .cluster.domain }}
+                tls:
+                  - hosts:
+                      - prom.{{ if eq .cluster.domain "nip.io" }}{{ index .cluster "a-record" }}{{ else }}{{ .cluster.subdomain }}{{ end }}.{{ .cluster.domain }}
+
+            grafana:
+              adminPassword: "H4Rd2Gu3szzs"
+              ingress:
+                enabled: true
+                ingressClassName: "nginx"
+                hosts:
+                  - grafana.{{ if eq .cluster.domain "nip.io" }}{{ index .cluster "a-record" }}{{ else }}{{ .cluster.subdomain }}{{ end }}.{{ .cluster.domain }}
+                tls:
+                  - hosts:
+                      - grafana.{{ if eq .cluster.domain "nip.io" }}{{ index .cluster "a-record" }}{{ else }}{{ .cluster.subdomain }}{{ end }}.{{ .cluster.domain }}
+
+            alertmanager:
+              ingress:
+                enabled: true
+                ingressClassName: "nginx"
+                hosts:
+                  - alertmanager.{{ if eq .cluster.domain "nip.io" }}{{ index .cluster "a-record" }}{{ else }}{{ .cluster.subdomain }}{{ end }}.{{ .cluster.domain }}
+                tls:
+                  - hosts:
+                      - alertmanager.{{ if eq .cluster.domain "nip.io" }}{{ index .cluster "a-record" }}{{ else }}{{ .cluster.subdomain }}{{ end }}.{{ .cluster.domain }}
+              alertmanagerSpec:
+                externalUrl: https://alertmanager.{{ if eq .cluster.domain "nip.io" }}{{ index .cluster "a-record" }}{{ else }}{{ .cluster.subdomain }}{{ end }}.{{ .cluster.domain }}
           valueFiles:
           - $values/workloads/kube-prometheus-stack/config/helm-values/{{ .themes.environment }}.yaml
       - repoURL: "https://github.com/jimangel/cd.git"
         targetRevision: '{{ .targetRevisionGit }}'
         ref: values
-      # get the Gateway API ingress resources from a local-helm config
-     # - repoURL: "https://github.com/jimangel/cd.git"
-     #   targetRevision: '{{ .targetRevisionGit }}'
-     #   helm:
-     #     parameters:
-     #     - name: prometheus.URL
-     #       value: "prometheus.{{ .cluster.subdomain }}.{{ .cluster.domain }}"
-     #     # doing some funky stuff (slice by 4 chars) with helm values to match the generated template / app name
-     #     values: |
-     #       prometheus:
-     #         url: "prometheus.{{ .cluster.subdomain }}.{{ .cluster.domain }}"
-     #         service:
-     #           name: "kube-prometheus-stack-{{ if eq .cluster.name "in-cluster" }}loca{{ else }}{{ slice .cluster.friendlyName 0 4 }}{{ end }}-prometheus"
-     #           port: "9090"
-     #       grafana:
-     #         url: "grafana.{{ .cluster.subdomain }}.{{ .cluster.domain }}"
-     #         service:
-     #           name: "kube-prometheus-stack-{{ if eq .cluster.name "in-cluster" }}local{{ else }}{{ .cluster.friendlyName }}{{ end }}-grafana"
-     #           port: "80"
-     #       alertmanager:
-     #         url: "alertmanager.{{ .cluster.subdomain }}.{{ .cluster.domain }}"
-     #         service:
-     #           name: "kube-prometheus-stack-{{ if eq .cluster.name "in-cluster" }}loca{{ else }}{{ slice .cluster.friendlyName 0 4 }}{{ end }}-alertmanager"
-     #           port: "9093"
-     #   path: workloads/kube-prometheus-stack/config/addon-chart-gateway
       destination:
         name: '{{ .cluster.name }}'
         namespace: monitoring
