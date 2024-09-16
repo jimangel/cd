@@ -28,6 +28,8 @@ spec:
             revision: HEAD
   template:
     metadata:
+      annotations:
+        argocd.argoproj.io/compare-options: ServerSideDiff=true
       name: 'kube-prometheus-stack-{{ if eq .cluster.name "in-cluster" }}local{{ else }}{{ .cluster.friendlyName }}{{ end }}'
       labels:
         workloadType: sre
