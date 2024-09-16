@@ -10,3 +10,9 @@ p: prom-operator (set by: grafana.adminPassword https://github.com/prometheus-co
 # UI
 
 HTTPRoutes are in the config sub helm for add on URLs (fixing to envoy)
+
+# check updates
+
+look for version, update environment values.
+
+https://github.com/prometheus-community/helm-charts
