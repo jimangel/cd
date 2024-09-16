@@ -5,6 +5,7 @@ cluster:
   friendlyName: "gpu-box"
   # use https://kubernetes.default.svc for local argo
   server: https://192.168.7.74:6443
+  ingress: enabled
   domain: nip.io
   a-record: 192.168.7.74
   # could be used for common ingress settings per cluster domain

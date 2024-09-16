@@ -43,6 +43,16 @@ spec:
       - repoURL: https://github.com/jimangel/cd.git
         targetRevision: HEAD
         path: workloads/01-argocd/config/overlays/{{ if eq .themes.provider "baremetal" }}baremetal{{ else }}{{ .themes.environment }}{{ end }}
+        kustomize:
+        # UPDATE INGRESS (ONLY TAKES EFFECT IF INGRESS CONTROLLER IS INSTALLED)
+          patches:
+          - target:
+              kind: Ingress
+              name: argocd-server-http-ingress
+            patch: |-
+              - op: replace
+                path: /spec/rules/0/host
+                value: argo.{{ if eq .cluster.domain "nip.io" }}{{ index .cluster "a-record" }}{{ else }}{{ .cluster.subdomain }}{{ end }}.{{ .cluster.domain }}
       # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
       # !!!!! ALL OF THE OTHER APPLICATION SETS !!!!!
       # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!

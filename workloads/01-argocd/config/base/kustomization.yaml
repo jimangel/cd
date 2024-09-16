@@ -11,6 +11,7 @@ resources:
 - github.com/argoproj/argo-cd/manifests/cluster-install?ref=v2.12.3
 # add a RESTART YAML
 - restart-argocd.yaml
+- argocd-ingress.yaml
 
 #components:
 # extensions controller component

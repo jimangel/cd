@@ -46,18 +46,6 @@ spec:
               containerPort:
                 http: 80
                 https: 443
-      - repoURL: https://github.com/jimangel/cd.git
-        path: workloads/nginx/config/base
-        targetRevision: HEAD
-        kustomize:
-          patches:
-          - target:
-              kind: Ingress
-              name: argocd-server-http-ingress
-            patch: |-
-              - op: replace
-                path: /spec/rules/0/host
-                value: argo.{{ if eq .cluster.domain "nip.io" }}{{ index .cluster "a-record" }}{{ else }}{{ .cluster.subdomain }}{{ end }}.{{ .cluster.domain }}
       destination:
         name: '{{ .cluster.name }}'
         # no namespace, cluster wide CRDs...
