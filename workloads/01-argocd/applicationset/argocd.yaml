@@ -44,8 +44,8 @@ spec:
         targetRevision: HEAD
         path: workloads/01-argocd/config/overlays/{{ if eq .themes.provider "baremetal" }}baremetal{{ else }}{{ .themes.environment }}{{ end }}
         kustomize:
-        # UPDATE INGRESS (ONLY TAKES EFFECT IF INGRESS CONTROLLER IS INSTALLED)
           patches:
+          # UPDATE INGRESS (ONLY TAKES EFFECT IF INGRESS CONTROLLER IS INSTALLED)
           - target:
               kind: Ingress
               name: argocd-server-http-ingress
